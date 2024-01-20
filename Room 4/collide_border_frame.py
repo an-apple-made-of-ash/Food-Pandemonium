@@ -1,8 +1,5 @@
-import os
 import pygame
-from pygame.locals import *
 import pytmx
-from pytmx import load_pygame
 
 def load_pygame(filename):
     tmx_data = pytmx.util_pygame.load_pygame(filename)
@@ -25,30 +22,6 @@ def get_collision_objects(tmx_data, layer_name):
                                          tmx_data.tilewidth, tmx_data.tileheight))
     return obstacles
 
-#Player Class
-class Player(pygame.sprite.Sprite):
-    def __init__(self, image_paths, initial_position):
-        super(Player,self).__init__()
-        self.images = [pygame.image.load(path) for path in image_paths]
-        self.index = 0
-        self.image = self.images[self.index]
-        self.rect = self.image.get_rect()
-        self.rect.topleft = initial_position
-
-#For Sprites 
-assets_path = os.path.join(os.path.dirname(__file__), "..", "Assets")
-paths = ["Delivery-Front.png","Delivery-Back.png","Delivery-Left.png","Delivery-Right.png"]
-sprites = []
-for path in paths: 
-    sprite_path = os.path.join(assets_path, path)
-    sprites.append(sprite_path)
-
-player = Player(sprites,(100,100))
-
-#Create sprite group and add player to it 
-all_sprites = pygame.sprite.Group() 
-all_sprites.add(player)
-
 def main():
     pygame.init()
     screen = pygame.display.set_mode((800, 600))
@@ -56,7 +29,7 @@ def main():
     obstacles = get_collision_objects(tmx_data, "Border_layer")
 
     # Player setup
-    player = player
+    player = pygame.Rect(100, 100, 32, 32)  # Example player rect
     speed = 1
 
     running = True

@@ -1,7 +1,7 @@
 import os
 import pygame
 from pygame.locals import *
-
+from tiles import *
 
 #Player Class
 class Player(pygame.sprite.Sprite):
@@ -31,7 +31,10 @@ class Player(pygame.sprite.Sprite):
         self.image = self.images[self.index]
 pygame.init() 
 
+map = TileMap('Room 2.csv')
 screen = pygame.display.set_mode([800,600])
+canvas = pygame.Surface([800,1200])
+
 pygame.display.set_caption("Room 2")
 
 #For Sprites 
@@ -52,18 +55,26 @@ clock = pygame.time.Clock()
 
 running = True 
 while running: 
-
+    clock.tick(60)
     for event in pygame.event.get():
         if event.type == pygame.QUIT: 
             running = False 
     
     all_sprites.update()
 
-    screen.fill((0,0,0))
+    canvas.fill((80, 80, 80))
+    map.draw_map(canvas)
+    
+    # Draw sprites on top of the map
+    all_sprites.draw(canvas)
 
-    all_sprites.draw(screen)
+    screen.blit(canvas, (0, 0))
     pygame.display.flip()
+    pygame.display.update()
 
-    clock.tick(60)
+    #Rain -> Either increase framerate or increase change in movement 
+    #Strong Winds -> Constantly Push back 
+
+
 
 pygame.quit()
