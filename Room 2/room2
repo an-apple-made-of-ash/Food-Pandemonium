@@ -18,12 +18,15 @@ class Player(pygame.sprite.Sprite):
         if keys[K_LEFT] or keys[K_a]:
             self.index=2
             self.rect.x -= 5
+
         if keys[K_RIGHT] or keys[K_d]:
             self.index=3
             self.rect.x += 5
+
         if keys[K_UP] or keys[K_w]:
             self.index=1
             self.rect.y -= 5
+
         if keys[K_DOWN] or keys[K_s]:
             self.index=0
             self.rect.y += 5

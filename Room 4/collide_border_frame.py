@@ -1,5 +1,6 @@
 import pygame
 import pytmx
+import os
 
 def load_pygame(filename):
     tmx_data = pytmx.util_pygame.load_pygame(filename)
@@ -25,7 +26,7 @@ def get_collision_objects(tmx_data, layer_name):
 def main():
     pygame.init()
     screen = pygame.display.set_mode((800, 600))
-    tmx_data = load_pygame('C:/Users/ashle/Documents/ash/hmmmmm/Room 4/border.tmx')
+    tmx_data = load_pygame(os.path.join(os.path.dirname(__file__),'border.tmx'))
     obstacles = get_collision_objects(tmx_data, "Border_layer")
 
     # Player setup
