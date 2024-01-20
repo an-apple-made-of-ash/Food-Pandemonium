@@ -29,7 +29,9 @@ def main():
     obstacles = get_collision_objects(tmx_data, 'Tile Layer 1')
 
     # Player setup
-    player = pygame.Rect(100, 300, 32, 32)  # Example player rect
+    # player = pygame.Rect(100, 300, 32, 32)  # Example player rect
+    player = pygame.image.load("/Users/joonh/Desktop/hmmmmm/Assets/Delivery-Right.png").convert_alpha()
+    player_rect = player.get_rect(center=(25, 25))
     speed = 1
 
     running = True
@@ -39,7 +41,7 @@ def main():
                 running = False
 
         keys = pygame.key.get_pressed()
-        new_position = player.copy()
+        new_position = player_rect.copy()
         if keys[pygame.K_LEFT]:
             new_position.x -= speed
         if keys[pygame.K_RIGHT]:
@@ -55,7 +57,7 @@ def main():
 
         screen.fill((0, 0, 0))  # Clear screen
         draw_map(screen, tmx_data)  
-        pygame.draw.rect(screen, (255, 0, 0), player)
+        pygame.draw.rect(screen, (255, 0, 0), player_rect)
         pygame.display.flip()
 
     pygame.quit()
