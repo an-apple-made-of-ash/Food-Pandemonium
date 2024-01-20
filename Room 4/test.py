@@ -33,6 +33,35 @@ class Player(pygame.sprite.Sprite):
         self.image = self.images[self.index]
 pygame.init() 
 
+
+# Border shiet
+def load_tile_table(filename, tile_width, tile_height):
+    image = pygame.image.load(filename).convert()
+    image_width, image_height = image.get_size()
+    tile_table = []
+    for tile_x in range(0, int(image_width/tile_width)):
+        line = []
+        tile_table.append(line)
+        for tile_y in range(0, int(image_height/tile_height)):
+            rect = (tile_x * tile_width, tile_y * tile_height, tile_width, tile_height)
+            line.append(image.subsurface(rect))
+    return tile_table
+
+def load_map(filename):
+    tmx_data = pytmx.util_pygame.load_pygame(filename)
+    tile_width = tmx_data.tilewidth
+    tile_height = tmx_data.tileheight
+
+    map_surface = pygame.Surface((tmx_data.width * tile_width, tmx_data.height * tile_height))
+    for layer in tmx_data.visible_layers:
+        if isinstance(layer, pytmx.TiledTileLayer):
+            for x, y, gid in layer:
+                tile = tmx_data.get_tile_image_by_gid(gid)
+                if tile:
+                    map_surface.blit(tile, (x * tile_width, y * tile_height))
+    return map_surface
+
+
 screen = pygame.display.set_mode([800,600])
 pygame.display.set_caption("Room 4")
 
@@ -52,9 +81,7 @@ all_sprites.add(player)
 
 clock = pygame.time.Clock()
 
-tmxdata = pytmx.TiledMap("border.tmx")
-map_img = tmx_data.get_tile_image(x, y, Border_layer)
-screen.blit(map_img, position)
+map_surface = load_map('C:/Users/ashle/Documents/ash/hmmmmm/Room 4/border.tmx')
 
 running = True 
 while running: 
@@ -66,6 +93,7 @@ while running:
     all_sprites.update()
 
     screen.fill((0,0,0))
+    screen.blit(map_surface, (0, 0))
 
     all_sprites.draw(screen)
     pygame.display.flip()

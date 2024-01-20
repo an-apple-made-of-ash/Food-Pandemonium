@@ -82,8 +82,85 @@ class Player(pygame.sprite.Sprite):
                 self.position.y = tile.rect.bottom + self.rect.h
                 self.rect.bottom = self.position.y
 
+# Inside your player.py module:
+
+class Deliveryman(Player):
+    def __init__(self):
+        super().__init__()
+        # Add any additional attributes specific to the Deliveryman class
+
+    def catch_thief(self, thief):
+        if self.rect.colliderect(thief.rect):
+            self.thieves_captured += 1
+            thief.disappear()
+
+    def update(self, dt, tiles):
+        super().update(dt, tiles)
+        # Add any additional update logic for the Deliveryman class, if needed
 
 
+class Thief(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = Spritesheet('thief_spritesheet.png').parse_sprite('thief.png')  # Adjust filenames as needed
+        self.rect = self.image.get_rect()
+        self.position = pygame.math.Vector2(0, 0)
+        # Add any additional attributes for the Thief class
+
+    def random_spawn(self, tiles):
+        # Implement logic to randomly spawn the thief on valid tiles
+        pass
+
+    def disappear(self):
+        # Implement logic to make the thief disappear when caught
+        pass
+
+    def update(self, dt):
+        # Add any update logic for the Thief class
+        pass
+
+    def draw(self, display):
+        display.blit(self.image, (self.rect.x, self.rect.y))
+
+
+# Inside your player.py module:
+
+class Thief(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = Spritesheet('thief_spritesheet.png').parse_sprite('thief.png')  # Adjust filenames as needed
+        self.rect = self.image.get_rect()
+        self.position = pygame.math.Vector2(0, 0)
+        self.is_spawned = False
+        self.speed = 2  # Adjust the speed as needed
+
+    def random_spawn(self, tiles):
+        if not self.is_spawned:
+            valid_spawn_tiles = [tile for tile in tiles if tile.is_walkable()]
+            if valid_spawn_tiles:
+                spawn_tile = random.choice(valid_spawn_tiles)
+                self.position.x = spawn_tile.rect.x
+                self.position.y = spawn_tile.rect.y
+                self.rect.topleft = self.position
+                self.is_spawned = True
+
+    def disappear(self):
+        self.is_spawned = False
+        # Implement any additional logic needed when the thief disappears
+
+    def update(self, dt):
+        if self.is_spawned:
+            # Example: Move the thief horizontally (you can modify this based on your game's logic)
+            self.position.x += self.speed * dt
+            self.rect.topleft = self.position
+
+            # Implement any additional logic for the thief's behavior, animation, etc.
+            # Example: Change direction when reaching the screen boundary
+            if self.position.x < 0 or self.position.x > SCREEN_WIDTH:
+                self.speed *= -1  # Reverse the direction
+
+    def draw(self, display):
+        display.blit(self.image, (self.rect.x, self.rect.y))
 
 
 
