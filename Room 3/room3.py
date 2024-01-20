@@ -1,47 +1,108 @@
-##hi hi
+##hi
 import pygame
 import pytmx
 import random
+import os
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, x, y, width, height):
-        super().__init__()
-        self.image_right = pygame.image.load("/Users/felicia/Documents/GitHub/hmmmmm/Assets/Delivery-Right.png")
-        self.image_left = pygame.image.load("/Users/felicia/Documents/GitHub/hmmmmm/Assets/Delivery-Left.png")
-        self.image = pygame.transform.scale(self.image_right, (width, height))
+    def __init__(self, x, y, image_paths):
+        self.img = [pygame.image.load(path) for path in image_paths]
+        self.images = [pygame.transform.scale(img,(30,30)) for img in self.img]
+        self.index = 0
+        self.image = self.images[self.index]
         self.rect = self.image.get_rect(topleft=(x, y))
-        self.speed = 2
+        self.speed = 5
         self.jump_power = 5
         self.gravity = 9.81
+        self.speed = 2
+        self.jump_power = 30
+        self.gravity = 3
+        self.jump = 1
         self.is_jumping = False
-        self.jump_count = 10
 
     def move(self, keys, obstacles):
         new_position = self.rect.copy()
 
         # Horizontal Movement
-        if keys[pygame.K_a]:
+        if keys[pygame.K_a] or keys[pygame.K_RIGHT]:
             new_position.x -= self.speed
-            self.image = pygame.transform.scale(self.image_left, (40, 40))
-        if keys[pygame.K_d]:
+            self.index = 2
+        if keys[pygame.K_d] or keys[pygame.K_LEFT]:
             new_position.x += self.speed
-            self.image = pygame.transform.scale(self.image_right, (40, 40))
+            self.index = 3
+
+        self.image = self.images[self.index]
 
         # Check for collisions in the horizontal direction
         if not any(new_position.colliderect(obstacle) for obstacle in obstacles):
             self.rect.topleft = new_position.topleft
 
         # Jumping
-        if keys[pygame.K_SPACE] and not self.is_jumping:
+        if keys[pygame.K_SPACE] and self.jump == 1: 
+            self.jump -= 1
+            if self.jump < 0: 
+                self.jump = 0
+            self.is_jumping = True
+            new_position.y -= self.jump_power
+            self.is_jumping = False 
+
+        if not self.is_jumping: 
+            new_position.y += self.gravity
+        
+        if any(new_position.colliderect(obstacle) for obstacle in obstacles):
+            self.jump = 1
+
+        # Collision detection
+        if not any(new_position.colliderect(obstacle) for obstacle in obstacles):
+            self.rect.topleft = new_position.topleft
+
+class Thief(pygame.sprite.Sprite):
+    def __init__(self, image_path, initial_position):
+        self.img = pygame.image.load(image_path)
+        self.image = pygame.transform.scale(self.img, (40, 40))
+        self.rect = self.image.get_rect()
+        self.rect.topleft = initial_position
+        self.speed = 20
+        self.jump_power = 50
+        self.gravity = 9.81
+        self.is_jumping = False
+        self.jump_count = 10
+
+    def move(self,obstacles):
+        new_position = self.rect.copy()
+
+        # Horizontal Movement
+        check = random.randint(0,60)
+        if check > 30: 
+            move = random.choice(['stay','left','right','jump'])
+        else:
+            move = 'stay'
+
+        if move == 'right':
+            new_position.x += self.speed
+        elif move == 'left':
+            new_position.x -= self.speed 
+        elif move == 'jump':
             self.is_jumping = True
 
-        if self.is_jumping:
+        if not any(new_position.colliderect(obstacle) for obstacle in obstacles):
+            self.rect.topleft = new_position.topleft
+        
+        if self.is_jumping == True:
             new_position.y -= self.jump_power
-            self.jump_count -= 1
+            lr = random.randint(1,2)
+            if lr == 1: 
+                new_position.x += self.speed
+            else:
+                new_position.x -= self.speed
+            self.is_jumping = False 
 
-            if self.jump_count <= 0:
-                self.is_jumping = False
-                self.jump_count = 10
+        if not self.is_jumping: 
+            new_position.y += self.gravity
+
+        if not any(new_position.colliderect(obstacle) for obstacle in obstacles):
+            self.rect.topleft = new_position.topleft
+
 
         # Apply gravity
         if not self.is_jumping:
@@ -50,66 +111,6 @@ class Player(pygame.sprite.Sprite):
         # Collision detection
         if not any(new_position.colliderect(obstacle) for obstacle in obstacles):
             self.rect.topleft = new_position.topleft
-
-class Thief(pygame.sprite.Sprite):
-    def __init__(self, x, y, width, height, speed, max_delay):
-        super().__init__()
-        # Load the image for the thief
-        self.image = pygame.image.load("/Users/felicia/Documents/GitHub/hmmmmm/Assets/Thief.png")
-        self.rect = self.image.get_rect(topleft=(x, y))
-        self.speed = speed
-        self.max_delay = max_delay
-        self.delay_counter = 0
-        self.random_direction_counter = 0
-        self.random_direction_delay = random.randint(30, 60)  # Delay before changing direction
-
-    def move(self, obstacles, map_width, map_height):
-        # If the delay counter is greater than 0, decrease it and return
-        if self.delay_counter > 0:
-            self.delay_counter -= 1
-            return
-
-        # Temporary position to check for collisions
-        new_position = self.rect.copy()
-
-        # Randomly change direction after a delay
-        self.random_direction_counter += 1
-        if self.random_direction_counter >= self.random_direction_delay:
-            self.random_direction_counter = 0
-            direction = random.choice(['left', 'right', 'up', 'down', 'stay'])
-        else:
-            # Continue with the current direction
-            direction = 'stay'
-
-        if direction == 'left':
-            new_position.x -= self.speed
-        elif direction == 'right':
-            new_position.x += self.speed
-        elif direction == 'up':
-            new_position.y -= self.speed
-        elif direction == 'down':
-            new_position.y += self.speed
-
-        # Check for collisions with obstacles
-        if any(new_position.colliderect(obstacle) for obstacle in obstacles):
-            return  # Do not move if there's a collision with an obstacle
-
-        # Check for collisions with map borders
-        if new_position.left < 0:
-            new_position.left = 0
-        if new_position.right > map_width:
-            new_position.right = map_width
-        if new_position.top < 0:
-            new_position.top = 0
-        if new_position.bottom > map_height:
-            new_position.bottom = map_height
-            self.delay_counter = random.randint(10, self.max_delay)  # Reset delay when hitting the bottom
-
-        # Update the position after checking collisions
-        self.rect.topleft = new_position.topleft
-
-        # Set a new delay counter
-        self.delay_counter = random.randint(10, self.max_delay)
 
 
 
@@ -135,9 +136,6 @@ class Camera:
         y = max(-(self.map_height - self.height), y)  # bottom
 
         self.camera = pygame.Rect(x, y, self.map_width, self.map_height)
-
-# ...
-
 
 def load_pygame(filename):
     tmx_data = pytmx.util_pygame.load_pygame(filename)
@@ -165,16 +163,31 @@ def main():
     pygame.init()
     screen_width, screen_height = 800, 600
     screen = pygame.display.set_mode((screen_width, screen_height))
-    tmx_data = load_pygame('/Users/felicia/Documents/GitHub/hmmmmm/Room 3/Rm3Mappls.tmx')
+    path = os.path.join(os.path.dirname(__file__), 'Rm3Mappls.tmx')
+    tmx_data = load_pygame(path)
     obstacles = get_collision_objects(tmx_data, "Tile Layer 1")
 
+    #Path to Assets
+    asset_path = os.path.join(os.path.dirname(__file__), "..", "Assets")
+    imgs = [] 
+    paths = ["Delivery-Front.png","Delivery-Back.png","Delivery-Left.png","Delivery-Right.png"]
+    sprites = []
+    for path in paths: 
+        sprite_path = os.path.join(asset_path, path)
+        sprites.append(sprite_path)
     # Player setup
-    player = Player(100, 100, 40, 40)  # Width and height set to 40 pixels
+    player = Player(100, 100, sprites)  # Width and height set to 40 pixels
 
     # Thieves setup
-    thieves = [Thief(random.randint(0, tmx_data.width * tmx_data.tilewidth),
-                    random.randint(0, tmx_data.height * tmx_data.tileheight),
-                    20, 20, 2, 60) for _ in range(3)]  # Adjust max_delay as needed
+    thieves = []
+    thief_path = os.path.join(asset_path, "Thief.png")
+    #coords = []
+    thief1 = Thief(thief_path, (200,200))
+    thief2 = Thief(thief_path, (800,560))
+    thief3 = Thief(thief_path, (1346,1000))
+    thieves.append(thief1)
+    thieves.append(thief2)
+    thieves.append(thief3)
 
     camera = Camera(screen_width, screen_height, tmx_data.width * tmx_data.tilewidth, tmx_data.height * tmx_data.tileheight)
 
@@ -198,8 +211,7 @@ def main():
 
         # Move and draw thieves
         for thief in thieves:
-            # Add print statements for debugging
-            thief.move(obstacles, tmx_data.width * tmx_data.tilewidth, tmx_data.height * tmx_data.tileheight)
+            thief.move(obstacles)
             screen.blit(thief.image, camera.apply(thief.rect))
 
         # Draw player on top of thieves
