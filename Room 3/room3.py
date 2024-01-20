@@ -11,11 +11,9 @@ class Player(pygame.sprite.Sprite):
         self.index = 0
         self.image = self.images[self.index]
         self.rect = self.image.get_rect(topleft=(x, y))
-        self.speed = 5
-        self.jump_power = 5
         self.gravity = 9.81
         self.speed = 2
-        self.jump_power = 30
+        self.jump_power = 33
         self.gravity = 3
         self.jump = 1
         self.is_jumping = False
@@ -58,6 +56,7 @@ class Player(pygame.sprite.Sprite):
 
 class Thief(pygame.sprite.Sprite):
     def __init__(self, image_path, initial_position):
+        super().__init__()
         self.img = pygame.image.load(image_path)
         self.image = pygame.transform.scale(self.img, (40, 40))
         self.rect = self.image.get_rect()
@@ -88,20 +87,6 @@ class Thief(pygame.sprite.Sprite):
         if not any(new_position.colliderect(obstacle) for obstacle in obstacles):
             self.rect.topleft = new_position.topleft
 
-        # Check if the thief has reached the bottom of the map
-        if new_position.y > pygame.display.get_surface().get_height():
-            # Respawn at a random point (not a tile ledge)
-            respawn_x = random.randint(0, pygame.display.get_surface().get_width())
-            respawn_y = 0
-
-            # Adjust the respawn position to avoid obstacles
-            while any(pygame.Rect(respawn_x, respawn_y, self.rect.width, self.rect.height).colliderect(obstacle) for obstacle in obstacles):
-                respawn_x = random.randint(0, pygame.display.get_surface().get_width())
-                respawn_y = 0
-
-            new_position.x = respawn_x
-            new_position.y = respawn_y
-
         if self.is_jumping == True:
             new_position.y -= self.jump_power
             lr = random.randint(1, 2)
@@ -117,11 +102,21 @@ class Thief(pygame.sprite.Sprite):
         # Apply gravity
         if not self.is_jumping:
             new_position.y += self.gravity
+            if new_position.y + new_position.height >= 1160:
+                new_position.y = 41
 
         # Collision detection
         if not any(new_position.colliderect(obstacle) for obstacle in obstacles):
             self.rect.topleft = new_position.topleft
 
+    def collide(self,player): 
+        if self.rect.colliderect(player.rect):
+            print("Collision detected")
+            self.kill()
+
+    #def update(self, obstacles, player):
+        #self.move(obstacles)
+        #self.collide(player)
 
 class Camera:
     def __init__(self, width, height, map_width, map_height):
@@ -193,7 +188,7 @@ def main():
     #coords = []
     thief1 = Thief(thief_path, (200,200))
     thief2 = Thief(thief_path, (800,560))
-    thief3 = Thief(thief_path, (1346,1000))
+    thief3 = Thief(thief_path, (900, 700))
     thieves.append(thief1)
     thieves.append(thief2)
     thieves.append(thief3)
@@ -222,10 +217,24 @@ def main():
         for thief in thieves:
             thief.move(obstacles)
             screen.blit(thief.image, camera.apply(thief.rect))
+            if thief.rect.colliderect(player.rect):
+                print("collision")
+                thieves.remove(thief) 
+            
+        if len(thieves) == 0: 
+            font = pygame.font.Font('freesansbold.ttf', 32)
+            text = font.render('Ok. So Dash got this round...', True, (0,200,0))
+            textRect = text.get_rect()
+            textRect.center = (400,300)
+            screen.fill((255,255,255))
+            player.new_position = (800,600)
+            screen.blit(text,textRect)
+                
 
         # Draw player on top of thieves
         screen.blit(player.image, camera.apply(player.rect))
 
+        pygame.display.update()
         pygame.display.flip()
     pygame.quit()
 
