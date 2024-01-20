@@ -1,4 +1,4 @@
-import pygame, csv, os 
+import pygame, csv, os, pytmx
 
 class Tile(pygame.sprite.Sprite):
     def __init__(self, image_path, x, y):
@@ -37,15 +37,17 @@ class TileMap():
     
     def load_tiles(self, filename):
         tiles = []
-        map = self.read_csv(filename) 
+        map = pytmx.util_pygame.load_pygame(filename)
         x, y = 0,0
         for row in map: 
             x=0
             for tile in row: 
-                if tile == "-1": #Blank
+                if tile == "0": #Blank
                     self.start_x, self.start_y = x * self.tile_size, y * self.tile_size
-                elif tile == "0":
+                elif tile == "1":
                     tiles.append(Tile("Dark Brick1.png", x * self.tile_size, y*self.tile_size))
+                elif tile == "2":
+                    tiles.append(Tile("Brick1.png", x * self.tile_size, y*self.tile_size))
                 
                 x+=1
 
