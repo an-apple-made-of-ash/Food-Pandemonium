@@ -31,7 +31,7 @@ def main():
     # Player setup
     # player = pygame.Rect(100, 300, 32, 32)  # Example player rect
     player = pygame.image.load("/Users/joonh/Desktop/hmmmmm/Assets/Delivery-Right.png").convert_alpha()
-    player_rect = player.get_rect(center=(25, 25))
+    player_rect = player.get_rect(center=(100, 300))
     speed = 1
 
     running = True
@@ -53,7 +53,7 @@ def main():
 
         # Collision detection
         if not any(new_position.colliderect(obstacle) for obstacle in obstacles):
-            player = new_position
+            player_rect = new_position
 
         screen.fill((0, 0, 0))  # Clear screen
         draw_map(screen, tmx_data)  
