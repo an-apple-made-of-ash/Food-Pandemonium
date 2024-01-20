@@ -44,11 +44,12 @@ while running:
 
 
     ################################# UPDATE/ Animate SPRITE #################################
-    player.update(dt, map.tiles)
+    player.update(dt)
     ################################# UPDATE WINDOW AND DISPLAY #################################
     canvas.fill((0, 180, 240)) # Fills the entire screen with light blue
     map.draw_map(canvas)
     player.draw(canvas)
+    #canvas.blit(player_img, player_rect)
     window.blit(canvas, (0,0))
     pygame.display.update()
 
