@@ -4,36 +4,37 @@ from pygame.locals import *
 from tiles import *
 from collide import *
 
-#Player Class
 class Player(pygame.sprite.Sprite):
-    def __init__(self, image_paths, initial_position):
-        super(Player,self).__init__()
-        self.images = [pygame.image.load(path) for path in image_paths]
+    def __init__(self, x, y, image_paths):
+        super().__init__()
+        self.img = [pygame.image.load(path) for path in image_paths]
+        self.images = [pygame.transform.scale(img,(30,30)) for img in self.img]
         self.index = 0
         self.image = self.images[self.index]
-        self.rect = self.image.get_rect()
-        self.rect.topleft = initial_position
+        self.rect = self.image.get_rect(topleft=(x, y))
+        self.speed = 5
 
-    def update(self): 
-        new_pos = self.rect.copy()
-        keys = pygame.key.get_pressed()
-        if keys[K_LEFT] or keys[K_a]:
-            self.index=2
-            self.rect.x -= 5
+    def move(self, keys, obstacles):
+        new_position = self.rect.copy()
 
-        if keys[K_RIGHT] or keys[K_d]:
-            self.index=3
-            self.rect.x += 5
-
-        if keys[K_UP] or keys[K_w]:
-            self.index=1
-            self.rect.y -= 5
-
-        if keys[K_DOWN] or keys[K_s]:
-            self.index=0
-            self.rect.y += 5
+        if keys[pygame.K_w] or keys[pygame.K_UP]:
+            new_position.y -= self.speed
+            self.index = 1
+        if keys[pygame.K_s] or keys[pygame.K_DOWN]:
+            new_position.y += self.speed
+            self.index = 0
+        if keys[pygame.K_a] or keys[pygame.K_RIGHT]:
+            new_position.x += self.speed
+            self.index = 3
+        if keys[pygame.K_d] or keys[pygame.K_LEFT]:
+            new_position.x -= self.speed
+            self.index = 2
 
         self.image = self.images[self.index]
+
+        # Check for collisions 
+        if not any(new_position.colliderect(obstacle) for obstacle in obstacles):
+            self.rect.topleft = new_position.topleft
         
 
 
@@ -48,15 +49,16 @@ obstacles = get_collision_objects(tmx_data, "Border_layer")
 
 pygame.display.set_caption("Room 4")
 
-#For Sprites 
-assets_path = os.path.join(os.path.dirname(__file__), "..", "Assets")
+#Path to Assets
+asset_path = os.path.join(os.path.dirname(__file__), "..", "Assets")
+imgs = [] 
 paths = ["Delivery-Front.png","Delivery-Back.png","Delivery-Left.png","Delivery-Right.png"]
 sprites = []
 for path in paths: 
-    sprite_path = os.path.join(assets_path, path)
+    sprite_path = os.path.join(asset_path, path)
     sprites.append(sprite_path)
-
-player = Player(sprites,(50,50))
+# Player setup
+player = Player(100, 100, sprites)  # Width and height set to 40 pixels
 
 #Create sprite group and add player to it 
 all_sprites = pygame.sprite.Group() 
@@ -71,7 +73,8 @@ while running:
         if event.type == pygame.QUIT: 
             running = False 
 
-    all_sprites.update()
+    #all_sprites.update()
+    player.move(pygame.key.get_pressed(), obstacles)
 
     canvas.fill((80, 80, 80))
     map.draw_map(canvas)
