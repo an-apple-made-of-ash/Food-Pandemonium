@@ -189,9 +189,15 @@ def main():
     thief1 = Thief(thief_path, (200,200))
     thief2 = Thief(thief_path, (800,560))
     thief3 = Thief(thief_path, (900, 700))
+    thief4 = Thief(thief_path, (900, 700))
+    thief5 = Thief(thief_path, (600, 600))
+    thief6 = Thief(thief_path, (700, 400))
     thieves.append(thief1)
     thieves.append(thief2)
     thieves.append(thief3)
+    thieves.append(thief4)
+    thieves.append(thief5)
+    thieves.append(thief6)
 
     camera = Camera(screen_width, screen_height, tmx_data.width * tmx_data.tilewidth, tmx_data.height * tmx_data.tileheight)
 

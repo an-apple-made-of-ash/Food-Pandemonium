@@ -12,10 +12,10 @@ class Tile(pygame.sprite.Sprite):
         surface.blit(self.image, (self.rect.x, self.rect.y))
 
 class TileMap():
-    def __init__(self, filename): 
+    def __init__(self, filename, tile_img): 
         self.tile_size = 20
         self.start_x, self.start_y = 0,0
-        self.tiles = self.load_tiles(filename)
+        self.tiles = self.load_tiles(filename, tile_img)
         self.map_surface = pygame.Surface((self.map_w, self.map_h))
         self.map_surface.set_colorkey((0,0,0))
         self.load_map()
@@ -35,7 +35,7 @@ class TileMap():
                 map.append(list(row))
         return map
     
-    def load_tiles(self, filename):
+    def load_tiles(self, filename, tile_img):
         tiles = []
         map = self.read_csv(filename) 
         x, y = 0,0
@@ -45,7 +45,7 @@ class TileMap():
                 if tile == "-1": #Blank
                     self.start_x, self.start_y = x * self.tile_size, y * self.tile_size
                 elif tile == "0":
-                    tiles.append(Tile("Dark Brick1.png", x * self.tile_size, y*self.tile_size))
+                    tiles.append(Tile(tile_img, x * self.tile_size, y*self.tile_size))
                 
                 x+=1
 

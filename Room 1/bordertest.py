@@ -3,8 +3,6 @@ import pygame
 from pygame.locals import *
 from tiles import *
 from collide import *
-import subprocess
-import sys
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, x, y, image_paths):
@@ -37,22 +35,19 @@ class Player(pygame.sprite.Sprite):
         # Check for collisions 
         if not any(new_position.colliderect(obstacle) for obstacle in obstacles):
             self.rect.topleft = new_position.topleft
-        else:
-            pygame.quit()
-            subprocess.run(['python', 'Room 4\\teleport.py'])
         
 
 
 pygame.init() 
 
-map = TileMap('teleportationRoom_Border.csv', "Dark Brick1.png")
+map = TileMap('room1_walls.csv')
 screen = pygame.display.set_mode([800,600])
 canvas = pygame.Surface([800,1200])
-path = os.path.join(os.path.dirname(__file__),'teleportationRoom.tmx')
+path = os.path.join(os.path.dirname(__file__),'room1_walls_test.tmx')
 tmx_data = load_pygame(path)
-obstacles = get_collision_objects(tmx_data, "Border")
+obstacles = get_collision_objects(tmx_data, "Tile Layer 1")
 
-pygame.display.set_caption("Room 4")
+pygame.display.set_caption("Room 1")
 
 #Path to Assets
 asset_path = os.path.join(os.path.dirname(__file__), "..", "Assets")
@@ -63,7 +58,7 @@ for path in paths:
     sprite_path = os.path.join(asset_path, path)
     sprites.append(sprite_path)
 # Player setup
-player = Player(100, 100, sprites)  # Width and height set to 40 pixels
+player = Player(100, 300, sprites)  # Width and height set to 40 pixels
 
 #Create sprite group and add player to it 
 all_sprites = pygame.sprite.Group() 
