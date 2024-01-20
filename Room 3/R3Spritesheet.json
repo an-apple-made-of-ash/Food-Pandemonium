@@ -1,0 +1,21 @@
+{"frames": {
+
+	"Brick.png":
+	{
+		"frame": {"x":0,"y":0,"w":20,"h":20},
+		"rotated": false,
+		"trimmed": false,
+		"spriteSourceSize": {"x":0,"y":0,"w":20,"h":20},
+		"sourceSize": {"w":20,"h":20}
+	},
+	"Tree.png":
+	{
+		"frame": {"x":16,"y":0,"w":20,"h":40},
+		"rotated": false,
+		"trimmed": false,
+		"spriteSourceSize": {"x":0,"y":0,"w":20,"h":40},
+		"sourceSize": {"w":20,"h":40}
+
+	} 
+}
+}
