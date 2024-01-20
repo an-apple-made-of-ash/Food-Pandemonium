@@ -2,6 +2,7 @@ import os
 import pygame
 from pygame.locals import *
 from tiles import *
+from collide import *
 
 #Player Class
 class Player(pygame.sprite.Sprite):
@@ -12,31 +13,49 @@ class Player(pygame.sprite.Sprite):
         self.image = self.images[self.index]
         self.rect = self.image.get_rect()
         self.rect.topleft = initial_position
+        self.new_x = 50
+        self.new_y = 50
 
     def update(self): 
         keys = pygame.key.get_pressed()
         if keys[K_LEFT] or keys[K_a]:
             self.index=2
-            self.rect.x -= 5
+            self.new_x = self.rect.x - 1
+            self.new_y = self.rect.y
 
         if keys[K_RIGHT] or keys[K_d]:
             self.index=3
-            self.rect.x += 5
+            self.new_x = self.rect.x + 1
+            self.new_y = self.rect.y
 
         if keys[K_UP] or keys[K_w]:
             self.index=1
-            self.rect.y -= 5
+            self.new_y = self.rect.y - 1
+            self.new_x = self.rect.x
 
         if keys[K_DOWN] or keys[K_s]:
             self.index=0
-            self.rect.y += 5
+            self.new_y = self.rect.y + 1
+            self.new_x = self.rect.x
 
         self.image = self.images[self.index]
+        if not any(self.rect.colliderect(obstacle) for obstacle in obstacles):
+            self.rect.x = self.new_x
+            self.rect.y = self.new_y
+        else: 
+            self.rect.x -= 1 
+            self.rect.y -= 1
+
+
+
 pygame.init() 
 
 map = TileMap('Room 2.csv')
 screen = pygame.display.set_mode([800,600])
 canvas = pygame.Surface([800,1200])
+path = os.path.join(os.path.dirname(__file__),'Room 2.tmx')
+tmx_data = load_pygame(path)
+obstacles = get_collision_objects(tmx_data, "Tile Layer")
 
 pygame.display.set_caption("Room 2")
 
@@ -48,7 +67,7 @@ for path in paths:
     sprite_path = os.path.join(assets_path, path)
     sprites.append(sprite_path)
 
-player = Player(sprites,(100,100))
+player = Player(sprites,(50,50))
 
 #Create sprite group and add player to it 
 all_sprites = pygame.sprite.Group() 
@@ -62,7 +81,7 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT: 
             running = False 
-    
+
     all_sprites.update()
 
     canvas.fill((80, 80, 80))
@@ -81,3 +100,11 @@ while running:
 
 
 pygame.quit()
+
+#Code for HARD MODE
+#if keys[K_DOWN] or keys[K_s]:
+    #self.index=0
+    #if not any(self.rect.colliderect(obstacle) for obstacle in obstacles):
+        #self.rect.y += 5
+    #else:
+        #self.rect.y += 0
