@@ -10,20 +10,20 @@ class Player(pygame.sprite.Sprite):
         self.index = 0
         self.image = self.resized[self.index]
         self.rect = self.image.get_rect(topleft=(x, y))
-        self.speed = 5
-        self.jump_power = 10
-        self.gravity = 1
+        self.speed = 2
+        self.jump_power = 30
+        self.gravity = 3
+        self.jump = 1
         self.is_jumping = False
-        self.jump_count = 10
 
     def move(self, keys, obstacles):
         new_position = self.rect.copy()
 
         # Horizontal Movement
-        if keys[pygame.K_a] or keys[pygame.K_RIGHT]:
+        if keys[pygame.K_a] or keys[pygame.K_LEFT]:
             new_position.x -= self.speed
             self.image = self.resized[2]
-        if keys[pygame.K_d] or keys[pygame.K_LEFT]:
+        if keys[pygame.K_d] or keys[pygame.K_RIGHT]:
             new_position.x += self.speed
             self.image = self.resized[3]
         
@@ -33,20 +33,25 @@ class Player(pygame.sprite.Sprite):
             self.rect.topleft = new_position.topleft
 
         # Jumping
-        if keys[pygame.K_SPACE] and not self.is_jumping:
+        if keys[pygame.K_SPACE] and self.jump == 1:
+            self.jump -= 1
+            if self.jump < 0: 
+                self.jump = 0
             self.is_jumping = True
-
-        if self.is_jumping:
             new_position.y -= self.jump_power
-            self.jump_count -= 1
-
-            if self.jump_count <= 0:
-                self.is_jumping = False
-                self.jump_count = 10
+            pygame.time.delay(500)
+            self.is_jumping = False
+        
 
         # Apply gravity
         if not self.is_jumping:
             new_position.y += self.gravity
+            
+        
+
+        if any(new_position.colliderect(obstacle) for obstacle in obstacles):
+            self.jump = 1
+            
 
         # Collision detection
         if not any(new_position.colliderect(obstacle) for obstacle in obstacles):
