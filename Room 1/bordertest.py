@@ -35,6 +35,24 @@ class Player(pygame.sprite.Sprite):
         # Check for collisions 
         if not any(new_position.colliderect(obstacle) for obstacle in obstacles):
             self.rect.topleft = new_position.topleft
+
+        # clear screen and set clipping region
+        screen.fill(0)    
+        clip_rect = pygame.Rect(new_position.x-radius+12, new_position.y-radius+12, radius*2, radius*2)
+        screen.set_clip(clip_rect)
+
+        # draw the scene
+        ts, w, h, c1, c2 = 50, *screen.get_size(), (255, 255, 255), (255, 0, 0)
+        tiles = [((x*ts, y*ts, ts, ts), c1 if (x+y) % 2 == 0 else c2) for x in range((w+ts-1)//ts) for y in range((h+ts-1)//ts)]
+        for rect, color in tiles:
+            pygame.draw.rect(screen, color, rect)
+        
+        pygame.draw.rect(screen, (0,255,0), player)
+        # pygame.display.update()
+
+        # draw transparent circle and update display
+        screen.blit(cover_surf, clip_rect)
+
         
 
 
@@ -46,6 +64,12 @@ canvas = pygame.Surface([800,1200])
 path = os.path.join(os.path.dirname(__file__),'room1_walls_test.tmx')
 tmx_data = load_pygame(path)
 obstacles = get_collision_objects(tmx_data, "Tile Layer 1")
+
+radius = 50
+cover_surf = pygame.Surface((radius*2, radius*2))
+cover_surf.fill(0)
+cover_surf.set_colorkey((255, 255, 255))
+pygame.draw.circle(cover_surf, (255, 255, 255), (radius, radius), radius)
 
 pygame.display.set_caption("Room 1")
 
@@ -82,6 +106,7 @@ while running:
     # Draw sprites on top of the map
     all_sprites.draw(canvas)
 
+   
     screen.blit(canvas, (0, 0))
     pygame.display.flip()
     pygame.display.update()
