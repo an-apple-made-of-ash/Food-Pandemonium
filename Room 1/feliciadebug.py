@@ -90,6 +90,9 @@ def main():
     imgs = []
     paths = ["Delivery-Front.png", "Delivery-Back.png", "Delivery-Left.png", "Delivery-Right.png"]
     sprites = [os.path.join(asset_path, path) for path in paths]
+    for path in paths: 
+        sprite_path = os.path.join(asset_path, path)
+        sprites.append(sprite_path)
 
     # Player setup
     player = Player(100, 100, sprites)  # Width and height set to 40 pixels

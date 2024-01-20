@@ -8,44 +8,77 @@ from collide import *
 class Player(pygame.sprite.Sprite):
     def __init__(self, image_paths, initial_position):
         super().__init__()
-        self.images = [pygame.image.load(path) for path in image_paths]
+        self.imag = [pygame.image.load(path) for path in image_paths]
+        self.images = [pygame.transform.scale(img, (38,38)) for img in self.imag]
         self.index = 0
         self.image = self.images[self.index]
         self.rect = self.image.get_rect()
         self.rect.topleft = initial_position
+        self.speed = 4
 
-    def update(self): 
+    def move(self, obstacles):
         new_position = self.rect.copy()
         keys = pygame.key.get_pressed()
-        if keys[K_LEFT] or keys[K_a]:
-            self.index=2
-            self.rect.x -= 1
-
-        if keys[K_RIGHT] or keys[K_d]:
-            self.index=3
-            self.rect.x += 1
-
-        if keys[K_UP] or keys[K_w]:
-            self.index=1
-            self.rect.y -= 1
-
-        if keys[K_DOWN] or keys[K_s]:
-            self.index=0
-            self.rect.y += 1
-
+        # Horizontal Movement
+        if keys[K_a] or keys[K_LEFT]:
+            new_position.x -= self.speed
+            self.index = 2
+        if keys[K_d] or keys[K_RIGHT]:
+            new_position.x += self.speed
+            self.index = 3
+        if keys[K_w] or keys[K_UP]:
+            new_position.y -= self.speed
+            self.index = 1
+        if keys[K_s] or keys[K_DOWN]:
+            new_position.y += self.speed
+            self.index = 0
+        
         self.image = self.images[self.index]
 
         if not any(new_position.colliderect(obstacle) for obstacle in obstacles):
             self.rect.topleft = new_position.topleft
 
-screen = pygame.display.set_mode([800,600])
-canvas = pygame.Surface([800,1200])
+class Camera:
+    def __init__(self, width, height, map_width, map_height):
+        self.camera = pygame.Rect(0, 0, width, height)
+        self.width = width
+        self.height = height
+        self.map_width = map_width
+        self.map_height = map_height
+
+    def apply(self, target_rect):
+        return target_rect.move(self.camera.topleft)
+
+    def update(self, target):
+        x = -target.rect.x + self.width // 2
+        y = -target.rect.y + self.height // 2
+
+        # Limit camera scroll to map boundaries
+        x = min(0, x)  # left
+        y = min(0, y)  # top
+        x = max(-(self.map_width - self.width), x)  # right
+        y = max(-(self.map_height - self.height), y)  # bottom
+
+        self.camera = pygame.Rect(x, y, self.map_width, self.map_height)
+
+def draw_map(surface, tmx_data, camera):
+    for layer in tmx_data.layers:
+        if isinstance(layer, pytmx.TiledTileLayer):
+            for x, y, gid in layer:
+                tile = tmx_data.get_tile_image_by_gid(gid)
+                if tile:
+                    surface.blit(tile, camera.apply(pygame.Rect(x * tmx_data.tilewidth, y * tmx_data.tileheight, tmx_data.tilewidth, tmx_data.tileheight)))
+
+
 pygame.init()
+
+screen = pygame.display.set_mode([800,600])
 path = os.path.join(os.path.dirname(__file__),'Room 2.tmx')
-map = TileMap(path)
 tmx_data = load_pygame(path)
 obstacles = get_collision_objects(tmx_data, "Tile Layer 2")
 
+
+    #Path to Assets
 pygame.display.set_caption("Room 2")
 
 #For Sprites 
@@ -62,6 +95,8 @@ player = Player(sprites,(50,50))
 all_sprites = pygame.sprite.Group() 
 all_sprites.add(player)
 
+camera = Camera(800,600, tmx_data.width * tmx_data.tilewidth, tmx_data.height * tmx_data.tileheight)
+
 clock = pygame.time.Clock()
 
 running = True 
@@ -71,15 +106,16 @@ while running:
         if event.type == pygame.QUIT: 
             running = False 
 
-    all_sprites.update()
+    player.move(obstacles)
 
-    canvas.fill((80, 80, 80))
-    map.draw_map(canvas)
+    all_sprites.update()
+    camera.update(player)
+
+    screen.fill((40,40,50))
+    draw_map(screen, tmx_data, camera)
     
     # Draw sprites on top of the map
-    all_sprites.draw(canvas)
-
-    screen.blit(canvas, (0, 0))
+    screen.blit(player.image, camera.apply(player.rect))
     pygame.display.flip()
     pygame.display.update()
 
