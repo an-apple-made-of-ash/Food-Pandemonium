@@ -43,12 +43,12 @@ class TileMap():
         for row in map:
             x = 0
             for tile in row:
-                if tile == '0':
+                if tile == '-1':
                     self.start_x, self.start_y = x * self.tile_size, y * self.tile_size
+                elif tile == '0':
+                    tiles.append(Tile('Brick.png', x * self.tile_size, y * self.tile_size, self.spritesheet))
                 elif tile == '1':
-                    tiles.append(Tile('grass.png', x * self.tile_size, y * self.tile_size, self.spritesheet))
-                elif tile == '2':
-                    tiles.append(Tile('grass2.png', x * self.tile_size, y * self.tile_size, self.spritesheet))
+                    tiles.append(Tile('Tree.png', x * self.tile_size, y * self.tile_size, self.spritesheet))
                     # Move to next tile in current row
                 x += 1
 
