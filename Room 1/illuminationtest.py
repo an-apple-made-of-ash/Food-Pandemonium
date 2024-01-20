@@ -35,8 +35,6 @@ while run:
 
     player = new_position
 
-    # clip_center = pygame.mouse.get_pos()
-
     # clear screen and set clipping region
     window.fill(0)    
     clip_rect = pygame.Rect((new_position.x)/1.5, (new_position.y)/1.5, radius*2, radius*2)
