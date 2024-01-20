@@ -1,18 +1,15 @@
 import pygame
 import pytmx
-import pygame
-import pytmx
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, x, y, width, height):
         super().__init__()
-        self.image_right = pygame.image.load("/Users/felicia/Documents/GitHub/hmmmmm/Assets/Delivery-Right.png")
-        self.image_left = pygame.image.load("/Users/felicia/Documents/GitHub/hmmmmm/Assets/Delivery-Left.png")
-        self.image = pygame.transform.scale(self.image_right, (width, height))
+        original_image = pygame.image.load("/Users/felicia/Documents/GitHub/hmmmmm/Assets/Delivery-Right.png")
+        self.image = pygame.transform.scale(original_image, (width, height))
         self.rect = self.image.get_rect(topleft=(x, y))
         self.speed = 5
-        self.jump_power = 10
-        self.gravity = 10
+        self.jump_power = 5
+        self.gravity = 9.81
         self.is_jumping = False
         self.jump_count = 10
 
@@ -22,35 +19,37 @@ class Player(pygame.sprite.Sprite):
         # Horizontal Movement
         if keys[pygame.K_a]:
             new_position.x -= self.speed
-            self.image = pygame.transform.scale(self.image_left, (40, 40))
         if keys[pygame.K_d]:
             new_position.x += self.speed
-            self.image = pygame.transform.scale(self.image_right, (40, 40))
 
         # Check for collisions in the horizontal direction
         if not any(new_position.colliderect(obstacle) for obstacle in obstacles):
             self.rect.topleft = new_position.topleft
 
         # Jumping
-        if keys[pygame.K_SPACE] and not self.is_jumping:
+        if keys[pygame.K_SPACE] and not self.is_jumping and any(new_position.colliderect(obstacle) for obstacle in obstacles):
             self.is_jumping = True
 
         if self.is_jumping:
             new_position.y -= self.jump_power
             self.jump_count -= 1
 
-            if self.jump_count <= 0:
+            # Check for collisions in the vertical direction
+            if not any(new_position.colliderect(obstacle) for obstacle in obstacles):
                 self.is_jumping = False
                 self.jump_count = 10
 
         # Apply gravity
-        if not self.is_jumping:
+        if not self.is_jumping and any(new_position.colliderect(obstacle) for obstacle in obstacles):
             new_position.y += self.gravity
+
+        # Downward Movement
+        if keys[pygame.K_DOWN]:
+            new_position.y += self.speed
 
         # Collision detection
         if not any(new_position.colliderect(obstacle) for obstacle in obstacles):
             self.rect.topleft = new_position.topleft
-
 
 def load_pygame(filename):
     tmx_data = pytmx.util_pygame.load_pygame(filename)
