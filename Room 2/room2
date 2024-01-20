@@ -3,36 +3,52 @@ import pygame
 from pygame.locals import *
 from tiles import *
 from collide import *
+import random
+import time
 
-#Player Class
+# Player Class
 class Player(pygame.sprite.Sprite):
     def __init__(self, image_paths, initial_position):
         super().__init__()
         self.imag = [pygame.image.load(path) for path in image_paths]
-        self.images = [pygame.transform.scale(img, (38,38)) for img in self.imag]
+        self.images = [pygame.transform.scale(img, (38, 38)) for img in self.imag]
         self.index = 0
         self.image = self.images[self.index]
         self.rect = self.image.get_rect()
         self.rect.topleft = initial_position
-        self.speed = 4
+        self.speed = 1
+        self.wind_direction = None  # To store wind direction
+        self.wind_duration = 10
 
     def move(self, obstacles):
         new_position = self.rect.copy()
         keys = pygame.key.get_pressed()
         # Horizontal Movement
         if keys[K_a] or keys[K_LEFT]:
-            new_position.x -= self.speed
-            self.index = 2
+            if westW == False:
+                new_position.x -= self.speed
+                self.index = 2
+            else:
+                self.index = 2
         if keys[K_d] or keys[K_RIGHT]:
-            new_position.x += self.speed
-            self.index = 3
+            if eastW == False:
+                new_position.x += self.speed
+                self.index = 3
+            else:
+                self.index = 3
         if keys[K_w] or keys[K_UP]:
-            new_position.y -= self.speed
-            self.index = 1
+            if northW == False:
+                new_position.y -= self.speed
+                self.index = 1
+            else:
+                self.index = 1
         if keys[K_s] or keys[K_DOWN]:
-            new_position.y += self.speed
-            self.index = 0
-        
+            if southW == False: 
+                new_position.y += self.speed
+                self.index = 0
+            else:
+                self.index = 0
+
         self.image = self.images[self.index]
 
         if not any(new_position.colliderect(obstacle) for obstacle in obstacles):
@@ -61,75 +77,143 @@ class Camera:
 
         self.camera = pygame.Rect(x, y, self.map_width, self.map_height)
 
-def draw_map(surface, tmx_data, camera):
-    for layer in tmx_data.layers:
-        if isinstance(layer, pytmx.TiledTileLayer):
-            for x, y, gid in layer:
-                tile = tmx_data.get_tile_image_by_gid(gid)
-                if tile:
-                    surface.blit(tile, camera.apply(pygame.Rect(x * tmx_data.tilewidth, y * tmx_data.tileheight, tmx_data.tilewidth, tmx_data.tileheight)))
+class NPC: 
+    def __init__(self,img_path): 
+        self.img = pygame.image.load(img_path)
+        self.rect = self.image.get_rect()
+
+    def spawn(self,screen_width, screen_height): 
+        self.rect.x = random.randint(0,screen_width)
+        self.rect.y = random.randint(0,screen_height)
+
+
+
+def nWind(player, obstacles):
+    new_position = player.rect.move(0, 10)
+    if not any(new_position.colliderect(obstacle) for obstacle in obstacles):
+        player.rect = new_position
+
+def sWind(player, obstacles):
+    new_position = player.rect.move(-10, 0)
+    if not any(new_position.colliderect(obstacle) for obstacle in obstacles):
+        player.rect = new_position
+
+def eWind(player, obstacles):
+    new_position = player.rect.move(10, 0)
+    if not any(new_position.colliderect(obstacle) for obstacle in obstacles):
+        player.rect = new_position
+
+def wWind(player, obstacles):
+    new_position = player.rect.move(0, -10)
+    if not any(new_position.colliderect(obstacle) for obstacle in obstacles):
+        player.rect = new_position
 
 
 pygame.init()
 
-screen = pygame.display.set_mode([800,600])
-path = os.path.join(os.path.dirname(__file__),'Room 2.tmx')
+width = 800
+height = 600
+screen = pygame.display.set_mode([width, height])
+path = os.path.join(os.path.dirname(__file__), 'Room 2.tmx')
 tmx_data = load_pygame(path)
 obstacles = get_collision_objects(tmx_data, "Tile Layer 2")
 
-
-    #Path to Assets
+# Path to Assets
 pygame.display.set_caption("Room 2")
-
-#For Sprites 
 assets_path = os.path.join(os.path.dirname(__file__), "..", "Assets")
-paths = ["Delivery-Front.png","Delivery-Back.png","Delivery-Left.png","Delivery-Right.png"]
+paths = ["Delivery-Front.png", "Delivery-Back.png", "Delivery-Left.png", "Delivery-Right.png"]
 sprites = []
-for path in paths: 
+for path in paths:
     sprite_path = os.path.join(assets_path, path)
     sprites.append(sprite_path)
 
-player = Player(sprites,(50,50))
+player = Player(sprites, (60, 525))
 
-#Create sprite group and add player to it 
-all_sprites = pygame.sprite.Group() 
+# Create sprite group and add player to it
+all_sprites = pygame.sprite.Group()
 all_sprites.add(player)
 
-camera = Camera(800,600, tmx_data.width * tmx_data.tilewidth, tmx_data.height * tmx_data.tileheight)
+camera = Camera(width, height, tmx_data.width * tmx_data.tilewidth, tmx_data.height * tmx_data.tileheight)
 
 clock = pygame.time.Clock()
+move = True
+running = True
+function_duration = 10000  # The duration of the wind function timer in milliseconds (10 seconds)
+delay_between_calls = 500  # The delay between wind function calls in milliseconds (1 second)
+last_wind_call_time = 0  # The time of the last wind function call
+last_weather_change = 0  # The time of the last weather change
+eastW = False 
+westW = False
+northW = False 
+southW = False
 
-running = True 
-while running: 
+#Adding Events that will happen 
+SPAWNNPC = pygame.USEREVENT + 1
+pygame.time.set_timer(SPAWNNPC, 3000)
+
+NPCs = pygame.sprite.Group()
+
+while running:
     clock.tick(60)
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT: 
-            running = False 
+    current_time = pygame.time.get_ticks()
 
-    player.move(obstacles)
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        
+        #elif event.type == SPAWNNPC:
+            #new_NPC = NPC() 
+            #NPCs.add(new_NPC)
+
+    if move:
+        player.move(obstacles)
+        if current_time - last_weather_change > 5000:  # Change weather every 10 seconds
+            weather = random.randint(1, 2)
+            eastW = False 
+            westW = False
+            northW = False 
+            southW = False
+            player.speed = 1
+
+            if weather == 1:
+                wind_direction = random.choice(["North", "South", "East", "West"])
+                print(wind_direction + " wind is blowing!")
+                if wind_direction == "North":
+                    northW = True 
+                elif wind_direction == "South":
+                    southW = True 
+                elif wind_direction == "West":
+                    westW = True 
+                elif wind_direction == "East": 
+                    eastW = True
+
+            elif weather == 2:
+                player.speed = 20
+                print("It's Raining")
+
+            
+            last_weather_change = current_time 
+            pygame.time.delay(delay_between_calls)      
 
     all_sprites.update()
     camera.update(player)
 
-    screen.fill((40,40,50))
+    screen.fill((40, 40, 50))
     draw_map(screen, tmx_data, camera)
-    
+
+    if (player.rect.x + player.rect.width) >= 1560 and (player.rect.y + player.rect.height) >= 560:
+        font = pygame.font.Font('freesansbold.ttf', 24)
+        text = font.render('Dash may have braved the weather but more awaits him...', True, (0, 200, 0))
+        textRect = text.get_rect()
+        textRect.center = (400, 300)
+        screen.fill((255, 255, 255))
+        player.rect.topleft = (800, 600)
+        screen.blit(text, textRect)
+        move = False
+
     # Draw sprites on top of the map
     screen.blit(player.image, camera.apply(player.rect))
     pygame.display.flip()
     pygame.display.update()
 
-    #Rain -> Either increase framerate or increase change in movement 
-    #Strong Winds -> Constantly Push back 
-
-
-
 pygame.quit()
-
-#Code for HARD MODE
-#if keys[K_DOWN] or keys[K_s]:
-    #self.index=0
-    #if not any(self.rect.colliderect(obstacle) for obstacle in obstacles):
-        #self.rect.y += 5
-    #else:
-        #self.rect.y += 0

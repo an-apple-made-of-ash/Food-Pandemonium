@@ -48,6 +48,8 @@ class TileMap():
                     tiles.append(Tile("Dark Brick1.png", x * self.tile_size, y*self.tile_size))
                 elif tile == "2":
                     tiles.append(Tile("Brick1.png", x * self.tile_size, y*self.tile_size))
+                elif tile == "3":
+                    tiles.append(Tile("Exit1.png", x * self.tile_size, y*self.tile_size))
                 
                 x+=1
 
