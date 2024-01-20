@@ -5,6 +5,14 @@ def load_pygame(filename):
     tmx_data = pytmx.util_pygame.load_pygame(filename)
     return tmx_data
 
+def draw_map(surface, tmx_data):
+    for layer in tmx_data.layers:
+        if isinstance(layer, pytmx.TiledTileLayer):
+            for x, y, gid in layer:
+                tile = tmx_data.get_tile_image_by_gid(gid)
+                if tile:
+                    surface.blit(tile, (x * tmx_data.tilewidth, y * tmx_data.tileheight))
+
 def get_collision_objects(tmx_data, layer_name):
     obstacles = []
     layer = tmx_data.get_layer_by_name('Tile Layer 1')
@@ -21,7 +29,9 @@ def main():
     obstacles = get_collision_objects(tmx_data, 'Tile Layer 1')
 
     # Player setup
-    player = pygame.Rect(100, 300, 32, 32)  # Example player rect
+    # player = pygame.Rect(100, 300, 32, 32)  # Example player rect
+    player = pygame.image.load("/Users/joonh/Desktop/hmmmmm/Assets/Delivery-Right.png").convert_alpha()
+    player_rect = player.get_rect(center=(25, 25))
     speed = 1
 
     running = True
@@ -31,7 +41,7 @@ def main():
                 running = False
 
         keys = pygame.key.get_pressed()
-        new_position = player.copy()
+        new_position = player_rect.copy()
         if keys[pygame.K_LEFT]:
             new_position.x -= speed
         if keys[pygame.K_RIGHT]:
@@ -46,11 +56,8 @@ def main():
             player = new_position
 
         screen.fill((0, 0, 0))  # Clear screen
-        pygame.draw.rect(screen, (255, 0, 0), player)  # Draw player
-        # Draw obstacles (for testing)
-        for obstacle in obstacles:
-            pygame.draw.rect(screen, (0, 255, 0), obstacle)
-
+        draw_map(screen, tmx_data)  
+        pygame.draw.rect(screen, (255, 0, 0), player_rect)
         pygame.display.flip()
 
     pygame.quit()
