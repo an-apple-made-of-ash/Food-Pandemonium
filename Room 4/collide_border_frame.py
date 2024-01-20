@@ -1,5 +1,6 @@
 import pygame
 import pytmx
+import os
 
 def load_pygame(filename):
     tmx_data = pytmx.util_pygame.load_pygame(filename)
