@@ -3,7 +3,7 @@
  <editorsettings>
   <export format="tmx"/>
  </editorsettings>
- <tileset firstgid="1" source="../../../../Desktop/feliciabrick.tsx"/>
+ <tileset firstgid="1" source="feliciabrick.tsx"/>
  <tileset firstgid="2" source="feliciaDarkBrick.tsx"/>
  <tileset firstgid="3" source="feliciaTree.tsx"/>
  <layer id="1" name="Tile Layer 1" width="80" height="60">
