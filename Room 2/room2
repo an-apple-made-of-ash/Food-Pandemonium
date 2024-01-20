@@ -7,7 +7,7 @@ from collide import *
 #Player Class
 class Player(pygame.sprite.Sprite):
     def __init__(self, image_paths, initial_position):
-        super(Player,self).__init__()
+        super().__init__()
         self.images = [pygame.image.load(path) for path in image_paths]
         self.index = 0
         self.image = self.images[self.index]
@@ -15,7 +15,7 @@ class Player(pygame.sprite.Sprite):
         self.rect.topleft = initial_position
 
     def update(self): 
-        new_pos = self.rect.copy()
+        new_position = self.rect.copy()
         keys = pygame.key.get_pressed()
         if keys[K_LEFT] or keys[K_a]:
             self.index=2
@@ -35,15 +35,16 @@ class Player(pygame.sprite.Sprite):
 
         self.image = self.images[self.index]
 
+        if not any(new_position.colliderect(obstacle) for obstacle in obstacles):
+            self.rect.topleft = new_position.topleft
 
-pygame.init() 
-
-map = TileMap('Room 2.csv')
 screen = pygame.display.set_mode([800,600])
 canvas = pygame.Surface([800,1200])
+pygame.init()
 path = os.path.join(os.path.dirname(__file__),'Room 2.tmx')
+map = TileMap(path)
 tmx_data = load_pygame(path)
-obstacles = get_collision_objects(tmx_data, "Tile Layer")
+obstacles = get_collision_objects(tmx_data, "Tile Layer 2")
 
 pygame.display.set_caption("Room 2")
 

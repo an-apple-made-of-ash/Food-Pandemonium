@@ -68,41 +68,51 @@ class Thief(pygame.sprite.Sprite):
         self.is_jumping = False
         self.jump_count = 10
 
-    def move(self,obstacles):
+    def move(self, obstacles):
         new_position = self.rect.copy()
 
         # Horizontal Movement
-        check = random.randint(0,60)
-        if check > 30: 
-            move = random.choice(['stay','left','right','jump'])
+        check = random.randint(0, 60)
+        if check > 30:
+            move = random.choice(['stay', 'left', 'right', 'jump'])
         else:
             move = 'stay'
 
         if move == 'right':
             new_position.x += self.speed
         elif move == 'left':
-            new_position.x -= self.speed 
+            new_position.x -= self.speed
         elif move == 'jump':
             self.is_jumping = True
 
         if not any(new_position.colliderect(obstacle) for obstacle in obstacles):
             self.rect.topleft = new_position.topleft
-        
+
+        # Check if the thief has reached the bottom of the map
+        if new_position.y > pygame.display.get_surface().get_height():
+            # Respawn at a random point (not a tile ledge)
+            respawn_x = random.randint(0, pygame.display.get_surface().get_width())
+            respawn_y = 0
+
+            # Adjust the respawn position to avoid obstacles
+            while any(pygame.Rect(respawn_x, respawn_y, self.rect.width, self.rect.height).colliderect(obstacle) for obstacle in obstacles):
+                respawn_x = random.randint(0, pygame.display.get_surface().get_width())
+                respawn_y = 0
+
+            new_position.x = respawn_x
+            new_position.y = respawn_y
+
         if self.is_jumping == True:
             new_position.y -= self.jump_power
-            lr = random.randint(1,2)
-            if lr == 1: 
+            lr = random.randint(1, 2)
+            if lr == 1:
                 new_position.x += self.speed
             else:
                 new_position.x -= self.speed
-            self.is_jumping = False 
+            self.is_jumping = False
 
-        if not self.is_jumping: 
+        if not self.is_jumping:
             new_position.y += self.gravity
-
-        if not any(new_position.colliderect(obstacle) for obstacle in obstacles):
-            self.rect.topleft = new_position.topleft
-
 
         # Apply gravity
         if not self.is_jumping:
@@ -111,7 +121,6 @@ class Thief(pygame.sprite.Sprite):
         # Collision detection
         if not any(new_position.colliderect(obstacle) for obstacle in obstacles):
             self.rect.topleft = new_position.topleft
-
 
 
 class Camera:
