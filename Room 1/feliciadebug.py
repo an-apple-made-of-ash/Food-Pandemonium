@@ -1,4 +1,3 @@
-##hi
 import pygame
 import pytmx
 import random
@@ -7,19 +6,16 @@ import os
 class Player(pygame.sprite.Sprite):
     def __init__(self, x, y, image_paths):
         self.img = [pygame.image.load(path) for path in image_paths]
-        self.images = [pygame.transform.scale(img,(30,30)) for img in self.img]
+        self.images = [pygame.transform.scale(img, (30, 30)) for img in self.img]
         self.index = 0
         self.image = self.images[self.index]
         self.rect = self.image.get_rect(topleft=(x, y))
         self.speed = 5
-        self.jump_power = 5
-        self.gravity = 9.81
-        self.speed = 2
         self.jump_power = 30
         self.gravity = 3
         self.jump = 1
         self.is_jumping = False
-        
+
     def move(self, keys, obstacles):
         new_position = self.rect.copy()
 
@@ -38,17 +34,17 @@ class Player(pygame.sprite.Sprite):
             self.rect.topleft = new_position.topleft
 
         # Jumping
-        if keys[pygame.K_SPACE] and self.jump == 1: 
+        if keys[pygame.K_SPACE] and self.jump == 1:
             self.jump -= 1
-            if self.jump < 0: 
+            if self.jump < 0:
                 self.jump = 0
             self.is_jumping = True
             new_position.y -= self.jump_power
-            self.is_jumping = False 
+            self.is_jumping = False
 
-        if not self.is_jumping: 
+        if not self.is_jumping:
             new_position.y += self.gravity
-        
+
         if any(new_position.colliderect(obstacle) for obstacle in obstacles):
             self.jump = 1
 
@@ -56,20 +52,21 @@ class Player(pygame.sprite.Sprite):
         if not any(new_position.colliderect(obstacle) for obstacle in obstacles):
             self.rect.topleft = new_position.topleft
 
-
-
 def load_pygame(filename):
     tmx_data = pytmx.util_pygame.load_pygame(filename)
     return tmx_data
 
 def draw_map(surface, tmx_data):
-    bg = pygame.image.load(os.path.join(os.path.dirname(__file__), '..','Assets','concrete floor.png'))
+    bg = pygame.image.load(os.path.join(os.path.dirname(__file__), '..', 'Assets', 'concrete floor.png'))
     for layer in tmx_data.layers:
         if isinstance(layer, pytmx.TiledTileLayer):
             for x, y, gid in layer:
                 tile = tmx_data.get_tile_image_by_gid(gid)
                 if tile:
-                    surface.blit(tile, bg)
+                    # Correct the order of arguments in the blit function
+                    surface.blit(bg, (x * tmx_data.tilewidth, y * tmx_data.tileheight))
+                    surface.blit(tile, (x * tmx_data.tilewidth, y * tmx_data.tileheight))
+
 
 def get_collision_objects(tmx_data, layer_name):
     obstacles = []
@@ -79,7 +76,6 @@ def get_collision_objects(tmx_data, layer_name):
             obstacles.append(pygame.Rect(x * tmx_data.tilewidth, y * tmx_data.tileheight,
                                          tmx_data.tilewidth, tmx_data.tileheight))
     return obstacles
-# ...
 
 def main():
     pygame.init()
@@ -89,17 +85,14 @@ def main():
     tmx_data = load_pygame(path)
     obstacles = get_collision_objects(tmx_data, "Tile Layer 1")
 
-    #Path to Assets
+    # Path to Assets
     asset_path = os.path.join(os.path.dirname(__file__), "..", "Assets")
-    imgs = [] 
-    paths = ["Delivery-Front.png","Delivery-Back.png","Delivery-Left.png","Delivery-Right.png"]
-    sprites = []
-    for path in paths: 
-        sprite_path = os.path.join(asset_path, path)
-        sprites.append(sprite_path)
+    imgs = []
+    paths = ["Delivery-Front.png", "Delivery-Back.png", "Delivery-Left.png", "Delivery-Right.png"]
+    sprites = [os.path.join(asset_path, path) for path in paths]
+
     # Player setup
     player = Player(100, 100, sprites)  # Width and height set to 40 pixels
-
 
     running = True
     clock = pygame.time.Clock()
@@ -114,11 +107,9 @@ def main():
 
         player.move(keys, obstacles)
 
-
         screen.fill((0, 0, 0))  # Clear screen
         draw_map(screen, tmx_data)
 
-       
         pygame.display.flip()
     pygame.quit()
 
