@@ -13,39 +13,27 @@ class Player(pygame.sprite.Sprite):
         self.image = self.images[self.index]
         self.rect = self.image.get_rect()
         self.rect.topleft = initial_position
-        self.new_x = 50
-        self.new_y = 50
 
     def update(self): 
+        new_pos = self.rect.copy()
         keys = pygame.key.get_pressed()
         if keys[K_LEFT] or keys[K_a]:
             self.index=2
-            self.new_x = self.rect.x - 1
-            self.new_y = self.rect.y
+            self.rect.x -= 1
 
         if keys[K_RIGHT] or keys[K_d]:
             self.index=3
-            self.new_x = self.rect.x + 1
-            self.new_y = self.rect.y
+            self.rect.x += 1
 
         if keys[K_UP] or keys[K_w]:
             self.index=1
-            self.new_y = self.rect.y - 1
-            self.new_x = self.rect.x
+            self.rect.y -= 1
 
         if keys[K_DOWN] or keys[K_s]:
             self.index=0
-            self.new_y = self.rect.y + 1
-            self.new_x = self.rect.x
+            self.rect.y += 1
 
         self.image = self.images[self.index]
-        if not any(self.rect.colliderect(obstacle) for obstacle in obstacles):
-            self.rect.x = self.new_x
-            self.rect.y = self.new_y
-        else: 
-            self.rect.x -= 1 
-            self.rect.y -= 1
-
 
 
 pygame.init() 
