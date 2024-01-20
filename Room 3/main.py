@@ -1,5 +1,5 @@
 import pygame
-# from tiles import *
+from tiles import *
 from spritesheet import Spritesheet
 # from player import Deliveryman
 # from thief import Thief  # Assuming you have a Thief class defined
@@ -25,9 +25,9 @@ map = TileMap('Room3Map.csv', spritesheet)
 # deliveryman.position.x, deliveryman.position.y = map.start_x, map.start_y
 
 # Initialize thieves
-thieves_list = [Thief() for _ in range(5)]
-for thief in thieves_list:
-    thief.random_spawn(map.tiles)
+#thieves_list = [Thief() for _ in range(5)]
+#for thief in thieves_list:
+    #thief.random_spawn(map.tiles)
 
 # Game loop
 while running:
@@ -53,8 +53,8 @@ while running:
 
     # Update deliveryman and check for catching thieves
     # deliveryman.update(dt, map.tiles)
-    for thief in thieves_list:
-        thief.update(dt)
+    #for thief in thieves_list:
+        #thief.update(dt)
         # deliveryman.catch_thief(thief)
 
     # Check victory condition
@@ -62,7 +62,7 @@ while running:
     #     print("Congratulations! You caught all the thieves. Victory!")
 
     # Update window and display
-    canvas.fill((0, 800, 600))
+    canvas.fill((0, 255, 0))
     map.draw_map(canvas)
     # deliveryman.draw(canvas)
 
