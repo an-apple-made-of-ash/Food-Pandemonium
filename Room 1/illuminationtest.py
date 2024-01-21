@@ -11,7 +11,7 @@ cover_surf.set_colorkey((255, 255, 255))
 pygame.draw.circle(cover_surf, (255, 255, 255), (radius, radius), radius)
 
 # Player setup
-player = pygame.Rect(100, 100, 32, 32)  # Example player rect
+player = pygame.Rect(200, 200, 32, 32)  # Example player rect
 speed = 1
 
 run = True
@@ -37,11 +37,14 @@ while run:
 
     # clear screen and set clipping region
     window.fill(0)    
-    clip_rect = pygame.Rect((new_position.x), (new_position.y), radius*2, radius*2)
+    clip_rect = pygame.Rect(new_position.x-radius+12, new_position.y-radius+12, radius*2, radius*2)
     window.set_clip(clip_rect)
 
     # draw the scene
-    window.fill((0, 0, 0))
+    ts, w, h, c1, c2 = 50, *window.get_size(), (255, 255, 255), (255, 0, 0)
+    tiles = [((x*ts, y*ts, ts, ts), c1 if (x+y) % 2 == 0 else c2) for x in range((w+ts-1)//ts) for y in range((h+ts-1)//ts)]
+    for rect, color in tiles:
+        pygame.draw.rect(window, color, rect)
     
     pygame.draw.rect(window, (0,255,0), player)
     # pygame.display.update()
