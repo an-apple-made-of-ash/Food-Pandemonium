@@ -2,10 +2,6 @@ import pygame
 import pytmx
 import random
 import os
-<<<<<<< Updated upstream
-import itertools
-import threading
-=======
 import openai
 import time
 import tiktoken 
@@ -48,7 +44,6 @@ def insult(model):
     #insults.append(text)
 
 
->>>>>>> Stashed changes
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, x, y, image_paths):
@@ -242,6 +237,11 @@ class NPC(pygame.sprite.Sprite):
         text_rect.center = self.speech_bubble_rect.center
         screen.blit(text_surface, text_rect)
 
+    def update(self):
+        current_time = pygame.time.get_ticks()
+        if current_time - self.appear_time > self.display_time:
+            self.kill()
+
 
 class Advertisement(pygame.sprite.Sprite):
     def __init__(self, ad_image_paths):
@@ -287,7 +287,6 @@ def get_collision_objects(tmx_data, layer_name):
             obstacles.append(pygame.Rect(x * tmx_data.tilewidth, y * tmx_data.tileheight,
                                          tmx_data.tilewidth, tmx_data.tileheight))
     return obstacles
-<<<<<<< Updated upstream
 class Advertisement(pygame.sprite.Sprite):
     def __init__(self, ad_image_paths):
         super(Advertisement, self).__init__()
@@ -319,10 +318,6 @@ def update_ads(ads):
         pygame.time.delay(100)  # Adjust delay as needed
 
 
-=======
-# ...
-# ...
->>>>>>> Stashed changes
 def main():
     pygame.init()
     screen_width, screen_height = 800, 600
@@ -343,10 +338,7 @@ def main():
     asset_path = os.path.join(os.path.dirname(__file__), "..", "Assets")
     imgs = ["Boy.png", "Man.png", "ManCap.png", "Woman.png"]
     paths = ["Delivery-Front.png", "Delivery-Back.png", "Delivery-Left.png", "Delivery-Right.png"]
-<<<<<<< Updated upstream
     ads = ["Ad4.png","Ad2.png","Ad3.png"]
-=======
->>>>>>> Stashed changes
     sprites = []
     ad_paths = []
     npc_sprites = []
@@ -358,15 +350,12 @@ def main():
         img_path = os.path.join(asset_path, path)
         npc_sprites.append(img_path)
 
-<<<<<<< Updated upstream
     for path in ads:
         img_path = os.path.join(asset_path, path)
         ad_paths.append(img_path)
 
     ads = Advertisement(ad_paths)
 
-=======
->>>>>>> Stashed changes
     # Player setup
     player = Player(100, 100, sprites)  # Width and height set to 40 pixels
 
@@ -385,13 +374,9 @@ def main():
                     tmx_data.height * tmx_data.tileheight)
     npc_group = pygame.sprite.Group()
 
-<<<<<<< Updated upstream
-    # Advertisement
-=======
     ad_paths = ["Ad1.png", "Ad2.png", "Ad3.png"]
     ads = Advertisement(ad_paths)
 
->>>>>>> Stashed changes
     advertisement_thread = threading.Thread(target=update_ads, args=(ads,))
     advertisement_thread.daemon = True
     advertisement_thread.start()
