@@ -27,7 +27,8 @@ def main():
     pygame.init()
     screen = pygame.display.set_mode((800, 600))
     tmx_data = load_pygame(os.path.join(os.path.dirname(__file__),'teleportationRoom.tmx'))
-    obstacles = get_collision_objects(tmx_data, "Border")
+    # obstacles = get_collision_objects(tmx_data, "Border")
+    obstacles = get_collision_objects(tmx_data, "Console")
 
     # Player setup
     player = pygame.Rect(100, 100, 32, 32)  # Example player rect
@@ -53,6 +54,18 @@ def main():
         # Collision detection
         if not any(new_position.colliderect(obstacle) for obstacle in obstacles):
             player = new_position
+ 
+        else:
+            ans = print(input("Input password: "))
+            if ans == "abc123":
+                running = False
+                font = pygame.font.Font('freesansbold.ttf', 24)
+                text = font.render('Dash may have braved the weather but more awaits him...', True, (0, 200, 0))
+                textRect = text.get_rect()
+                textRect.center = (400, 300)
+                screen.fill((255, 255, 255))
+                player.rect.topleft = (800, 600)
+                screen.blit(text, textRect)
 
         screen.fill((0, 0, 0))  # Clear screen
         draw_map(screen, tmx_data)  
@@ -61,6 +74,8 @@ def main():
         pygame.display.flip()
 
     pygame.quit()
+
+
 
 if __name__ == '__main__':
     main()
