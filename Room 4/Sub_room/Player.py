@@ -5,7 +5,6 @@ from random import shuffle
 passwords = {1: 'hyefxt', 2: 'rwvnxz', 3: 'ctwldx', 4: 'lbimco', 5: 'mactuy', 6: 'fydaea'}
 order = [1, 2, 3, 4, 5, 6]
 shuffle(order)
-print(order)
 
 
 class Player(pygame.sprite.Sprite):
@@ -41,4 +40,23 @@ class Player(pygame.sprite.Sprite):
             self.rect.topleft = new_position.topleft
         
         if any(new_position.colliderect(obstacle) for obstacle in treasure1):
-            pass
+            message = str(order[0]) + ": " + passwords[order[0]]
+
+        if any(new_position.colliderect(obstacle) for obstacle in treasure2):
+            message = str(order[1]) + ": " + passwords[order[1]]
+
+        if any(new_position.colliderect(obstacle) for obstacle in treasure3):
+            message = str(order[2]) + ": " + passwords[order[2]]
+
+        if any(new_position.colliderect(obstacle) for obstacle in treasure4):
+            message = str(order[3]) + ": " +  passwords[order[3]]
+
+        if any(new_position.colliderect(obstacle) for obstacle in treasure5):
+            message = str(order[4]) + ": " + passwords[order[4]]
+
+        if any(new_position.colliderect(obstacle) for obstacle in treasure6):
+            message = str(order[5]) + ": " + passwords[order[5]]
+
+        if any(new_position.colliderect(obstacle) for obstacle in portal):
+            pygame.quit()
+            subprocess.run(['python', 'room4.py'])
