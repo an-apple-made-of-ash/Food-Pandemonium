@@ -4,7 +4,6 @@ from pygame.locals import *
 from tiles import *
 from collide import *
 import random
-import time
 
 # Player Class
 class Player(pygame.sprite.Sprite):
@@ -17,36 +16,26 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.topleft = initial_position
         self.speed = 1
-        self.wind_direction = None  # To store wind direction
-        self.wind_duration = 10
 
     def move(self, obstacles):
         new_position = self.rect.copy()
         keys = pygame.key.get_pressed()
         # Horizontal Movement
         if keys[K_a] or keys[K_LEFT]:
-            if westW == False:
+            if not westW:
                 new_position.x -= self.speed
                 self.index = 2
-            else:
-                self.index = 2
         if keys[K_d] or keys[K_RIGHT]:
-            if eastW == False:
+            if not eastW:
                 new_position.x += self.speed
                 self.index = 3
-            else:
-                self.index = 3
         if keys[K_w] or keys[K_UP]:
-            if northW == False:
+            if not northW:
                 new_position.y -= self.speed
                 self.index = 1
-            else:
-                self.index = 1
         if keys[K_s] or keys[K_DOWN]:
-            if southW == False: 
+            if not southW: 
                 new_position.y += self.speed
-                self.index = 0
-            else:
                 self.index = 0
 
         self.image = self.images[self.index]
@@ -77,22 +66,29 @@ class Camera:
 
         self.camera = pygame.Rect(x, y, self.map_width, self.map_height)
 
-class NPC(pygame.sprite.Sprite): 
-    def __init__(self,img_path): 
+# Wind Class
+class Wind(pygame.sprite.Sprite):
+    def __init__(self, image_paths, initial_position, direction):
         super().__init__()
-        self.img = pygame.image.load(img_path)
-        self.rect = self.img.get_rect()
-        self.rect.x = random.randint(0,width - self.rect.width)
-        self.rect.y = random.randint(0,height - self.rect.height)
-        self.appear_time = pygame.time.get_ticks()
-        self.display_time = 4000
-        
+        # Select a random path from the list
+        image_path = random.choice(image_paths)
+        self.image = pygame.image.load(image_path)
+        self.rect = self.image.get_rect()
+        self.rect.topleft = initial_position
+        self.speed = 5
+        self.direction = direction
     def update(self):
-        current_time = pygame.time.get_ticks()
-        if current_time - self.appear_time > self.display_time:
-            self.kill()
-        
+        if self.direction == "North":
+            self.rect.y -= self.speed
+        elif self.direction == "South":
+            self.rect.y += self.speed
+        elif self.direction == "West":
+            self.rect.x -= self.speed
+        elif self.direction == "East":
+            self.rect.x += self.speed
 pygame.init()
+
+
 
 width = 800
 height = 600
@@ -101,42 +97,33 @@ path = os.path.join(os.path.dirname(__file__), 'Room 2.tmx')
 tmx_data = load_pygame(path)
 obstacles = get_collision_objects(tmx_data, "Tile Layer 2")
 
-# Path for Assets
 pygame.display.set_caption("Room 2")
 assets_path = os.path.join(os.path.dirname(__file__), "..", "Assets")
 paths = ["Delivery-Front.png", "Delivery-Back.png", "Delivery-Left.png", "Delivery-Right.png"]
-sprites = []
-for path in paths:
-    sprite_path = os.path.join(assets_path, path)
-    sprites.append(sprite_path)
+sprites = [os.path.join(assets_path, path) for path in paths]
 
-#Player
 player = Player(sprites, (60, 525))
-
-# Create sprite group and add player to it
 all_sprites = pygame.sprite.Group()
 all_sprites.add(player)
 camera = Camera(width, height, tmx_data.width * tmx_data.tilewidth, tmx_data.height * tmx_data.tileheight)
 
-#Setting up Variables 
 clock = pygame.time.Clock()
 move = True
 running = True
-function_duration = 10000  # The duration of the wind function timer in milliseconds (10 seconds)
-delay_between_calls = 500  # The delay between wind function calls in milliseconds (1 second)
-last_wind_call_time = 0  # The time of the last wind function call
-last_weather_change = 0  # The time of the last weather change
-eastW = False 
+last_weather_change = 0
+eastW = False
 westW = False
-northW = False 
+northW = False
 southW = False
 
-#Adding Events that will happen 
-SPAWNNPC = pygame.USEREVENT + 1
-pygame.time.set_timer(SPAWNNPC, 5000)
+rain_path = "C:\\Users\\Couga\\Documents\\GitHub\\hmmmmm\\Assets\\Rain Filter.png"
+rain_filter = pygame.image.load(rain_path)
 
-NPCs = pygame.sprite.Group()
+wind_paths = ["C:\\Users\\Couga\\Documents\\GitHub\\hmmmmm\\Assets\\Wind.png",  # Add more paths if needed
+              "C:\\Users\\Couga\\Documents\\GitHub\\hmmmmm\\Assets\\Wind.png",
+              "C:\\Users\\Couga\\Documents\\GitHub\\hmmmmm\\Assets\\Wind.png"]
 
+winds = []  # List to hold instances of Wind class
 while running:
     clock.tick(60)
     current_time = pygame.time.get_ticks()
@@ -144,42 +131,33 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        
-        elif event.type == SPAWNNPC:
-            new_NPC = NPC("Assets/Woman.png") 
-            NPCs.add(new_NPC)
 
     if move:
         player.move(obstacles)
-        if current_time - last_weather_change > 5000:  # Change weather every 10 seconds
+        if current_time - last_weather_change > 5000:
             weather = random.randint(1, 2)
-            eastW = False 
+            eastW = False
             westW = False
-            northW = False 
+            northW = False
             southW = False
             player.speed = 1
 
             if weather == 1:
                 wind_direction = random.choice(["North", "South", "East", "West"])
                 print(wind_direction + " wind is blowing!")
-                if wind_direction == "North":
-                    northW = True 
-                elif wind_direction == "South":
-                    southW = True 
-                elif wind_direction == "West":
-                    westW = True 
-                elif wind_direction == "East": 
-                    eastW = True
+                if wind_direction != "None":
+                    wind = Wind(wind_paths,
+                                (random.randint(0, width), random.randint(0, height)),
+                                wind_direction)
+                    winds.append(wind)
+                    all_sprites.add(wind)
 
             elif weather == 2:
                 player.speed = 20
                 print("It's Raining")
 
-            
-            last_weather_change = current_time 
-            pygame.time.delay(delay_between_calls)      
+            last_weather_change = current_time
 
-    NPCs.update() 
     all_sprites.update()
     camera.update(player)
 
@@ -196,8 +174,9 @@ while running:
         screen.blit(text, textRect)
         move = False
 
-    # Draw sprites on top of the map
-    screen.blit(player.image, camera.apply(player.rect))
+    for sprite in all_sprites:
+        screen.blit(sprite.image, camera.apply(sprite.rect))
+
     pygame.display.flip()
     pygame.display.update()
 
