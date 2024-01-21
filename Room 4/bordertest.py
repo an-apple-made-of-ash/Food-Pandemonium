@@ -38,27 +38,19 @@ class Player(pygame.sprite.Sprite):
         if not any(new_position.colliderect(obstacle) for obstacle in obstacles):
             self.rect.topleft = new_position.topleft
         else:
-<<<<<<< Updated upstream
-            if any(new_position.colliderect(obstaclestele) for obstacle in obstacles):
-                pygame.quit()
-                subprocess.run(['python', 'Room4\\Sub_room\\sub_sub_room.py'])
-=======
             pygame.quit()
             subprocess.run(['python', 'teleport.py'])
->>>>>>> Stashed changes
         
 
 
 pygame.init() 
 
-mapborder = TileMap('teleportationRoom_Border.csv', "Dark Brick1.png")
-maptele = TileMap('teleportationRoom_Teleport.csv', 'Portal.png')
+map = TileMap('teleportationRoom_Border.csv', "Dark Brick1.png")
 screen = pygame.display.set_mode([800,600])
 canvas = pygame.Surface([800,1200])
 path = os.path.join(os.path.dirname(__file__),'teleportationRoom.tmx')
 tmx_data = load_pygame(path)
-obstaclesborder = get_collision_objects(tmx_data, "Border")
-obstaclestele = get_collision_objects(tmx_data, "Teleport")
+obstacles = get_collision_objects(tmx_data, "Border")
 
 pygame.display.set_caption("Room 4")
 
@@ -87,12 +79,10 @@ while running:
             running = False 
 
     #all_sprites.update()
-    player.move(pygame.key.get_pressed(), obstaclesborder)
-    player.move(pygame.key.get_pressed(), obstaclestele)
+    player.move(pygame.key.get_pressed(), obstacles)
 
     canvas.fill((80, 80, 80))
-    mapborder.draw_map(canvas)
-    maptele.draw_map(canvas)
+    map.draw_map(canvas)
     
     # Draw sprites on top of the map
     all_sprites.draw(canvas)
