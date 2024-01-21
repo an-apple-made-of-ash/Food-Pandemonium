@@ -17,11 +17,11 @@ class NPC(pygame.sprite.Sprite):
         if corner == "top_left":
             self.rect.topleft = (0, 0)
         elif corner == "top_right":
-            self.rect.topright = (SCREEN_WIDTH-60, 0)
+            self.rect.topright = (SCREEN_WIDTH-130, 0)
         elif corner == "bottom_left":
             self.rect.bottomleft = (0, SCREEN_HEIGHT)
         elif corner == "bottom_right":
-            self.rect.bottomright = (SCREEN_WIDTH-60, SCREEN_HEIGHT)
+            self.rect.bottomright = (SCREEN_WIDTH-130, SCREEN_HEIGHT)
 
         # Load speech bubble image
         self.speech_bubble = pygame.image.load("/Users/felicia/Documents/GitHub/hmmmmm/Assets/SpeechBubble.png")
@@ -36,20 +36,20 @@ class NPC(pygame.sprite.Sprite):
 
     def set_speech_bubble_position(self, corner):
         if corner == "top_left":
-            self.speech_bubble_rect.midbottom = (150, 0)
+            self.speech_bubble_rect.midbottom = (150, 85)
         elif corner == "top_right":
-            self.speech_bubble_rect.midbottom = (SCREEN_WIDTH-210, 0)
+            self.speech_bubble_rect.midbottom = (SCREEN_WIDTH-68, 85)
         elif corner == "bottom_left":
-            self.speech_bubble_rect.midtop = (0, SCREEN_HEIGHT-150)
+            self.speech_bubble_rect.midtop = (150, SCREEN_HEIGHT-140)
         elif corner == "bottom_right":
-            self.speech_bubble_rect.midtop = (SCREEN_WIDTH-60, SCREEN_HEIGHT)
+            self.speech_bubble_rect.midtop = (SCREEN_WIDTH-68, SCREEN_HEIGHT-140)
 
     def show_speech_bubble(self, screen):
         # Render speech bubble
         screen.blit(self.speech_bubble, self.speech_bubble_rect)
 
         # Render text
-        font = pygame.font.Font(None, 36)
+        font = pygame.font.SysFont("comicsansms", 14)
         text_surface = font.render(self.text, True, (0, 0, 0))
         text_rect = text_surface.get_rect()
         text_rect.center = self.speech_bubble_rect.center
