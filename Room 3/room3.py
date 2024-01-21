@@ -1,10 +1,54 @@
-##hi
 import pygame
 import pytmx
 import random
 import os
+<<<<<<< Updated upstream
 import itertools
 import threading
+=======
+import openai
+import time
+import tiktoken 
+import threading
+import itertools
+
+# Set your company's ChatGPT API key and URL here
+company_api_key = "981bdca6dae44b78a930541b4577f696"
+company_api_url = "https://dso-ie-openai.openai.azure.com/"
+
+# Ensure the company's ChatGPT API key is used directly
+openai.api_key = company_api_key
+
+def insult(model):
+    insults = []
+    prompt = "Pretend you are an annoyed resident. Give me one very rude sentence expressing annoyance towards the delivery man for being slow. Give me a new novel response each time"
+
+    openai.api_type = "azure"
+    openai.api_version = "2023-05-15"
+    openai.api_base = "https://dso-ie-openai.openai.azure.com/"
+    openai.api_key = "981bdca6dae44b78a930541b4577f696"
+
+    if model == 'gpt-4':
+        azure_oai_model = "dsogpt4" 
+    else:
+        azure_oai_model = "dsochatgpt35"
+
+    response = openai.ChatCompletion.create(
+        engine=azure_oai_model,
+        temperature=0,
+        max_tokens=256,
+        messages=[
+            {"role": "system", "content": prompt},
+            {"role": "user", "content": prompt}
+        ]
+    )
+
+    text = str(response.choices[0].message.content)
+    print(text)
+    #insults.append(text)
+
+
+>>>>>>> Stashed changes
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, x, y, image_paths):
@@ -144,7 +188,7 @@ class Camera:
         self.camera = pygame.Rect(x, y, self.map_width, self.map_height)
 
 class NPC(pygame.sprite.Sprite):
-    def __init__(self,img_list):
+    def __init__(self,img_list, insult_func):
         super(NPC, self).__init__()
         original_image = pygame.image.load(random.choice(img_list))
         self.image = pygame.transform.scale(original_image, (120, 180))
@@ -169,10 +213,11 @@ class NPC(pygame.sprite.Sprite):
         self.speech_bubble_rect = self.speech_bubble.get_rect()
 
         # Text to be displayed in the speech bubble
-        self.text = "Hello, I'm an NPC!"
+        self.text = insult_func()
 
         # Set the position of the speech bubble based on the corner
         self.set_speech_bubble_position(corner)
+
 
     def set_speech_bubble_position(self, corner):
         screen_width = 800
@@ -197,6 +242,31 @@ class NPC(pygame.sprite.Sprite):
         text_rect.center = self.speech_bubble_rect.center
         screen.blit(text_surface, text_rect)
 
+
+class Advertisement(pygame.sprite.Sprite):
+    def __init__(self, ad_image_paths):
+        super(Advertisement, self).__init__()
+        self.image_paths = ad_image_paths
+        self.image_index = itertools.cycle(range(len(ad_image_paths)))
+        self.image = pygame.image.load(ad_image_paths[next(self.image_index)])
+        self.rect = self.image.get_rect()
+        self.visible = False
+        self.display_start_time = 0
+
+    def show(self, screen, current_time):
+        if self.visible:
+            screen.blit(self.image, self.rect)
+            if current_time - self.display_start_time >= 2000:
+                self.visible = False
+
+    def update(self, current_time):
+        if current_time - self.display_start_time >= 7000:
+            self.visible = True
+            self.display_start_time = current_time
+            self.image = pygame.image.load(self.image_paths[next(self.image_index)])
+
+
+
 def load_pygame(filename):
     tmx_data = pytmx.util_pygame.load_pygame(filename)
     return tmx_data
@@ -217,6 +287,7 @@ def get_collision_objects(tmx_data, layer_name):
             obstacles.append(pygame.Rect(x * tmx_data.tilewidth, y * tmx_data.tileheight,
                                          tmx_data.tilewidth, tmx_data.tileheight))
     return obstacles
+<<<<<<< Updated upstream
 class Advertisement(pygame.sprite.Sprite):
     def __init__(self, ad_image_paths):
         super(Advertisement, self).__init__()
@@ -248,6 +319,10 @@ def update_ads(ads):
         pygame.time.delay(100)  # Adjust delay as needed
 
 
+=======
+# ...
+# ...
+>>>>>>> Stashed changes
 def main():
     pygame.init()
     screen_width, screen_height = 800, 600
@@ -268,7 +343,10 @@ def main():
     asset_path = os.path.join(os.path.dirname(__file__), "..", "Assets")
     imgs = ["Boy.png", "Man.png", "ManCap.png", "Woman.png"]
     paths = ["Delivery-Front.png", "Delivery-Back.png", "Delivery-Left.png", "Delivery-Right.png"]
+<<<<<<< Updated upstream
     ads = ["Ad4.png","Ad2.png","Ad3.png"]
+=======
+>>>>>>> Stashed changes
     sprites = []
     ad_paths = []
     npc_sprites = []
@@ -280,12 +358,15 @@ def main():
         img_path = os.path.join(asset_path, path)
         npc_sprites.append(img_path)
 
+<<<<<<< Updated upstream
     for path in ads:
         img_path = os.path.join(asset_path, path)
         ad_paths.append(img_path)
 
     ads = Advertisement(ad_paths)
 
+=======
+>>>>>>> Stashed changes
     # Player setup
     player = Player(100, 100, sprites)  # Width and height set to 40 pixels
 
@@ -304,7 +385,13 @@ def main():
                     tmx_data.height * tmx_data.tileheight)
     npc_group = pygame.sprite.Group()
 
+<<<<<<< Updated upstream
     # Advertisement
+=======
+    ad_paths = ["Ad1.png", "Ad2.png", "Ad3.png"]
+    ads = Advertisement(ad_paths)
+
+>>>>>>> Stashed changes
     advertisement_thread = threading.Thread(target=update_ads, args=(ads,))
     advertisement_thread.daemon = True
     advertisement_thread.start()
