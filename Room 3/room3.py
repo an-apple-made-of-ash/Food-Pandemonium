@@ -254,7 +254,7 @@ def main():
     screen = pygame.display.set_mode((screen_width, screen_height))
     
     # Load background image
-    background_image_path = os.path.join(os.path.dirname(__file__), "PaneBG.png")
+    background_image_path = os.path.join(os.path.dirname(__file__), "/Users/felicia/Documents/GitHub/hmmmmm/Assets/PaneBG.png")
     background_image = pygame.image.load(background_image_path)
     background_image = pygame.transform.scale(background_image, (screen_width, screen_height))
 
