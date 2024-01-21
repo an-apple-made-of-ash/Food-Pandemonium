@@ -25,10 +25,10 @@ class Player(pygame.sprite.Sprite):
         if keys[pygame.K_s] or keys[pygame.K_DOWN]:
             new_position.y += self.speed
             self.index = 0
-        if keys[pygame.K_a] or keys[pygame.K_RIGHT]:
+        if keys[pygame.K_a] or keys[pygame.K_LEFT]:
             new_position.x += self.speed
             self.index = 3
-        if keys[pygame.K_d] or keys[pygame.K_LEFT]:
+        if keys[pygame.K_d] or keys[pygame.K_RIGHT]:
             new_position.x -= self.speed
             self.index = 2
 
@@ -38,9 +38,14 @@ class Player(pygame.sprite.Sprite):
         if not any(new_position.colliderect(obstacle) for obstacle in obstacles):
             self.rect.topleft = new_position.topleft
         else:
+<<<<<<< Updated upstream
             if any(new_position.colliderect(obstaclestele) for obstacle in obstacles):
                 pygame.quit()
                 subprocess.run(['python', 'Room4\\Sub_room\\sub_sub_room.py'])
+=======
+            pygame.quit()
+            subprocess.run(['python', 'teleport.py'])
+>>>>>>> Stashed changes
         
 
 
