@@ -2,20 +2,25 @@ import pygame
 import pytmx
 import subprocess
 from random import shuffle
+import os
 from tiles import *
-from collide import *
 
+pygame.font.init()
+import time
 
 passwords = {1: 'hyefxt', 2: 'rwvnxz', 3: 'ctwldx', 4: 'lbimco', 5: 'mactuy', 6: 'fydaea'}
 order = [1, 2, 3, 4, 5, 6]
 shuffle(order)
 
 
-def pop_message(window, message):
-    font = pygame.font.SysFont("comicsansms", 14)
-    text_surface = font.render(message, True, (0, 0, 0))
-    text_rect = text_surface.get_rect()
-    window.blit(text_surface, text_rect)
+def show_popup_text(window, message, duration, pos, font_size=36, color=(255, 255, 255), bgcolor=(0, 0, 0)):
+    font = pygame.font.Font(None, font_size)
+    text_surface = font.render(message, True, color, bgcolor)
+    window.blit(text_surface, pos)
+    pygame.display.update()
+    time.sleep(duration)
+    window.fill(bgcolor, (pos[0], pos[1], text_surface.get_width(), text_surface.get_height()))
+    pygame.display.update()
 
 
 def load_pygame(filename):
@@ -46,13 +51,13 @@ class Player(pygame.sprite.Sprite):
     def __init__(self, x, y, image_paths):
         super().__init__()
         self.img = [pygame.image.load(path) for path in image_paths]
-        self.images = [pygame.transform.scale(img,(30,30)) for img in self.img]
+        self.images = [pygame.transform.scale(img, (30, 30)) for img in self.img]
         self.index = 0
         self.image = self.images[self.index]
         self.rect = self.image.get_rect(topleft=(x, y))
         self.speed = 5
 
-    def move(self, keys, border, treasure1, treasure2, treasure3, treasure4, treasure5, treasure6, portal, window):
+    def move(self, keys, border, window):
         new_position = self.rect.copy()
 
         if keys[pygame.K_w] or keys[pygame.K_UP]:
@@ -70,63 +75,38 @@ class Player(pygame.sprite.Sprite):
 
         self.image = self.images[self.index]
 
-        # Check for collisions 
+        # Check for collisions
         if not any(new_position.colliderect(obstacle) for obstacle in border):
             self.rect.topleft = new_position.topleft
-        
-        if any(new_position.colliderect(obstacle) for obstacle in treasure1):
-            message = str(order[0]) + ": " + passwords[order[0]]
-            pop_message(window, message)
-            pygame.time.wait(3000)
 
-        if any(new_position.colliderect(obstacle) for obstacle in treasure2):
-            message = str(order[1]) + ": " + passwords[order[1]]
-            pop_message(window, message)
-            pygame.time.wait(3000)
+def display_answer(order, passwords, player_rect, window):
+    for i in range(6):
+        if player_rect.colliderect(portal_rects[i]):
+            message = f"{order[i]}: {passwords[order[i]]}"
+            show_popup_text(window, message, 3, (400, 200))
+            return
 
-        if any(new_position.colliderect(obstacle) for obstacle in treasure3):
-            message = str(order[2]) + ": " + passwords[order[2]]
-            pop_message(window, message)
-            pygame.time.wait(3000)
-
-        if any(new_position.colliderect(obstacle) for obstacle in treasure4):
-            message = str(order[3]) + ": " +  passwords[order[3]]
-            pop_message(window, message)
-            pygame.time.wait(3000)
-
-        if any(new_position.colliderect(obstacle) for obstacle in treasure5):
-            message = str(order[4]) + ": " + passwords[order[4]]
-            pop_message(window, message)
-            pygame.time.wait(3000)
-
-        if any(new_position.colliderect(obstacle) for obstacle in treasure6):
-            message = str(order[5]) + ": " + passwords[order[5]]
-            pop_message(window, message)
-            pygame.time.wait(3000)
-
-        if any(new_position.colliderect(obstacle) for obstacle in portal):
-            pygame.quit()
-            subprocess.run(['python', 'room4.py'])
-
-
-map = TileMap('teleportationRoom_Border.csv', "Dark Brick1.png")
-screen = pygame.display.set_mode([800,600])
-canvas = pygame.Surface([800,1200])
-path = os.path.join(os.path.dirname(__file__),'treasure_chest_map.tmx')
+map = TileMap('treasure_chest_map.csv', "Dark Brick1.png")
+screen = pygame.display.set_mode([800, 600])
+canvas = pygame.Surface([800, 1200])
+path = os.path.join(os.path.dirname(__file__), 'treasure_chest_map.tmx')
 tmx_data = load_pygame(path)
 border = get_collision_objects(tmx_data, "Border")
-portals = get_collision_objects(tmx_data,"Teleport")
-treasure1 = get_collision_objects(tmx_data,"Treasure Chest 1")
-treasure2 = get_collision_objects(tmx_data,"Treasure Chest 2")
-treasure3 = get_collision_objects(tmx_data,"Treasure Chest 3")
-treasure4 = get_collision_objects(tmx_data,"Treasure Chest 4")
-treasure5 = get_collision_objects(tmx_data,"Treasure Chest 5")
-treasure6 = get_collision_objects(tmx_data,"Treasure Chest 6")
+
+# Define the portal rectangles
+portal_rects = [
+    pygame.Rect(580, 380, 80, 80),
+    pygame.Rect(380, 380, 80, 80),
+    pygame.Rect(180, 180, 80, 80),
+    pygame.Rect(580, 180, 80, 80),
+    pygame.Rect(380, 180, 80, 80),
+    pygame.Rect(180, 180, 80, 80)
+]
 
 pygame.display.set_caption("Room 4")
 
 #Path to Assets
-asset_path = os.path.join(os.path.dirname(__file__), "..", "Assets")
+asset_path = "C:/Users/ashle/Documents/ash/hmmmmm/Assets"
 imgs = [] 
 paths = ["Delivery-Front.png","Delivery-Back.png","Delivery-Left.png","Delivery-Right.png"]
 sprites = []
@@ -142,25 +122,20 @@ all_sprites.add(player)
 
 clock = pygame.time.Clock()
 
-running = True 
-while running: 
+running = True
+while running:
     clock.tick(60)
     for event in pygame.event.get():
-        if event.type == pygame.QUIT: 
-            running = False 
+        if event.type == pygame.QUIT:
+            running = False
 
-    #all_sprites.update()
-    player.move(pygame.key.get_pressed(), border, treasure1, treasure2, treasure3, treasure4, treasure5, treasure6, portals, screen)
-
+    player.move(pygame.key.get_pressed(), border, screen)
     canvas.fill((80, 80, 80))
     map.draw_map(canvas)
-    
-    # Draw sprites on top of the map
+    display_answer(order, passwords, player.rect, screen)  # Check for displaying answers
     all_sprites.draw(canvas)
     screen.blit(canvas, (0, 0))
     pygame.display.flip()
     pygame.display.update()
-
-
 
 pygame.quit()

@@ -237,6 +237,11 @@ class NPC(pygame.sprite.Sprite):
         text_rect.center = self.speech_bubble_rect.center
         screen.blit(text_surface, text_rect)
 
+    def update(self):
+        current_time = pygame.time.get_ticks()
+        if current_time - self.appear_time > self.display_time:
+            self.kill()
+
 
 class Advertisement(pygame.sprite.Sprite):
     def __init__(self, ad_image_paths):
@@ -345,6 +350,12 @@ def main():
         img_path = os.path.join(asset_path, path)
         npc_sprites.append(img_path)
 
+    for path in ads:
+        img_path = os.path.join(asset_path, path)
+        ad_paths.append(img_path)
+
+    ads = Advertisement(ad_paths)
+
     # Player setup
     player = Player(100, 100, sprites)  # Width and height set to 40 pixels
 
@@ -363,7 +374,7 @@ def main():
                     tmx_data.height * tmx_data.tileheight)
     npc_group = pygame.sprite.Group()
 
-  
+    ad_paths = ["Ad1.png", "Ad2.png", "Ad3.png"]
     ads = Advertisement(ad_paths)
 
     advertisement_thread = threading.Thread(target=update_ads, args=(ads,))
