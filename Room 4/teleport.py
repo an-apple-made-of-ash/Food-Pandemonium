@@ -3,6 +3,7 @@ import pygame
 from pygame.locals import *
 from tiles import *
 from collide import *
+import subprocess
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, x, y, image_paths):
@@ -35,17 +36,20 @@ class Player(pygame.sprite.Sprite):
         # Check for collisions 
         if not any(new_position.colliderect(obstacle) for obstacle in obstacles):
             self.rect.topleft = new_position.topleft
+        else:
+            pygame.quit()
+            subprocess.run(['python', 'Room 4\\teleport.py'])
         
 
 
 pygame.init() 
 
-map = TileMap('teleportationRoom_Teleport.csv', 'Portal.png')
+maptele = TileMap('teleportationRoom_Teleport.csv', 'Portal.png')
 screen = pygame.display.set_mode([800,600])
 canvas = pygame.Surface([800,1200])
 path = os.path.join(os.path.dirname(__file__),'teleportationRoom.tmx')
 tmx_data = load_pygame(path)
-obstacles = get_collision_objects(tmx_data, "Teleport")
+obstaclestele = get_collision_objects(tmx_data, "Teleport")
 
 pygame.display.set_caption("Room 4")
 
