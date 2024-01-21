@@ -26,22 +26,24 @@ class Player(pygame.sprite.Sprite):
             new_position.y += self.speed
             self.index = 0
         if keys[pygame.K_a] or keys[pygame.K_LEFT]:
-            new_position.x += self.speed
+            new_position.x -= self.speed
             self.index = 3
         if keys[pygame.K_d] or keys[pygame.K_RIGHT]:
-            new_position.x -= self.speed
+            new_position.x += self.speed
             self.index = 2
 
         self.image = self.images[self.index]
 
         # Check for collisions 
-        if not any(new_position.colliderect(obstacle) for obstacle in obstacles):
+        # Check for collisions with "Teleport" layer
+        teleport_collisions = [obstacle for obstacle in obstacles if obstacle.layer_name == "Teleport"]
+        if not any(new_position.colliderect(obstacle) for obstacle in teleport_collisions):
             self.rect.topleft = new_position.topleft
         else:
             pygame.quit()
-            subprocess.run(['python', 'teleport.py'])
-        
+            # Add teleportation logic here, if needed
 
+        
 
 pygame.init() 
 
@@ -51,6 +53,7 @@ canvas = pygame.Surface([800,1200])
 path = os.path.join(os.path.dirname(__file__),'teleportationRoom.tmx')
 tmx_data = load_pygame(path)
 obstacles = get_collision_objects(tmx_data, "Border")
+portals = get_collision_objects(tmx_data,"Teleport")
 
 pygame.display.set_caption("Room 4")
 
@@ -86,7 +89,6 @@ while running:
     
     # Draw sprites on top of the map
     all_sprites.draw(canvas)
-
     screen.blit(canvas, (0, 0))
     pygame.display.flip()
     pygame.display.update()
