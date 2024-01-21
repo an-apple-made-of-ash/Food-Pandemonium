@@ -3,6 +3,8 @@ import pygame
 import pytmx
 import random
 import os
+import itertools
+import threading
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, x, y, image_paths):
@@ -215,7 +217,36 @@ def get_collision_objects(tmx_data, layer_name):
             obstacles.append(pygame.Rect(x * tmx_data.tilewidth, y * tmx_data.tileheight,
                                          tmx_data.tilewidth, tmx_data.tileheight))
     return obstacles
-# ...
+class Advertisement(pygame.sprite.Sprite):
+    def __init__(self, ad_image_paths):
+        super(Advertisement, self).__init__()
+        self.image_paths = ad_image_paths
+        self.image_index = itertools.cycle(range(len(ad_image_paths)))
+        self.image = pygame.image.load(ad_image_paths[next(self.image_index)])
+        self.rect = self.image.get_rect()
+        self.visible = False
+        self.display_start_time = 0
+
+    def show(self, screen, current_time):
+        if self.visible:
+            screen.blit(self.image, self.rect)
+            pygame.time.delay(1500)
+            if current_time - self.display_start_time >= 3000:
+                self.visible = False
+
+
+    def update(self, current_time):
+        if current_time - self.display_start_time >= 10000:
+            self.visible = True
+            self.display_start_time = current_time
+            self.image = pygame.image.load(self.image_paths[next(self.image_index)])
+
+def update_ads(ads):
+    while True:
+        current_time = pygame.time.get_ticks()
+        ads.update(current_time)
+        pygame.time.delay(100)  # Adjust delay as needed
+
 
 def main():
     pygame.init()
@@ -227,48 +258,59 @@ def main():
     spawn_time = pygame.time.get_ticks()
     npc_visible = False
 
-    #Path to Assets
+    # Path to Assets
     asset_path = os.path.join(os.path.dirname(__file__), "..", "Assets")
-    imgs = ["Boy.png","Man.png","ManCap.png","Woman.png"] 
-    paths = ["Delivery-Front.png","Delivery-Back.png","Delivery-Left.png","Delivery-Right.png"]
+    imgs = ["Boy.png", "Man.png", "ManCap.png", "Woman.png"]
+    paths = ["Delivery-Front.png", "Delivery-Back.png", "Delivery-Left.png", "Delivery-Right.png"]
+    ads = ["Ad4.png","Ad2.png","Ad3.png"]
     sprites = []
+    ad_paths = []
     npc_sprites = []
-    for path in paths: 
+    for path in paths:
         sprite_path = os.path.join(asset_path, path)
         sprites.append(sprite_path)
 
     for path in imgs:
-        img_path = os.path.join(asset_path,path)
+        img_path = os.path.join(asset_path, path)
         npc_sprites.append(img_path)
-    
+
+    for path in ads:
+        img_path = os.path.join(asset_path, path)
+        ad_paths.append(img_path)
+
+    ads = Advertisement(ad_paths)
+
     # Player setup
     player = Player(100, 100, sprites)  # Width and height set to 40 pixels
 
     # Thieves setup
     thieves = []
     thief_path = os.path.join(asset_path, "Thief.png")
-    #coords = []
-    thief1 = Thief(thief_path, (200,200))
-    thief2 = Thief(thief_path, (800,560))
+    thief1 = Thief(thief_path, (200, 200))
+    thief2 = Thief(thief_path, (800, 560))
     thief3 = Thief(thief_path, (900, 700))
     thief4 = Thief(thief_path, (900, 700))
     thief5 = Thief(thief_path, (600, 600))
     thief6 = Thief(thief_path, (700, 400))
-    thieves.append(thief1)
-    thieves.append(thief2)
-    thieves.append(thief3)
-    thieves.append(thief4)
-    thieves.append(thief5)
-    thieves.append(thief6)
+    thieves.extend([thief1, thief2, thief3, thief4, thief5, thief6])
 
-    camera = Camera(screen_width, screen_height, tmx_data.width * tmx_data.tilewidth, tmx_data.height * tmx_data.tileheight)
+    camera = Camera(screen_width, screen_height, tmx_data.width * tmx_data.tilewidth,
+                    tmx_data.height * tmx_data.tileheight)
     npc_group = pygame.sprite.Group()
+
+    #Advertisement
+    advertisement_thread = threading.Thread(target=update_ads, args=(ads,))
+    advertisement_thread.daemon = True
+    advertisement_thread.start()
+
 
     running = True
     clock = pygame.time.Clock()
-    while running:
-        clock.tick(60)  # Limit to 60 frames per second
 
+    # Adjust the frame rate here (e.g., 30 frames per second)
+    target_fps = 30
+
+    while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
@@ -277,7 +319,6 @@ def main():
         current_time = pygame.time.get_ticks()
 
         player.move(keys, obstacles)
-
         camera.update(player)
 
         screen.fill((0, 0, 0))  # Clear screen
@@ -289,39 +330,32 @@ def main():
             screen.blit(thief.image, camera.apply(thief.rect))
             if thief.rect.colliderect(player.rect):
                 print("collision")
-                thieves.remove(thief) 
-            
-        if len(thieves) == 0: 
-            font = pygame.font.Font('freesansbold.ttf', 32)
-            text = font.render('Ok. So Dash got this round...', True, (0,200,0))
-            textRect = text.get_rect()
-            textRect.center = (400,300)
-            screen.fill((255,255,255))
-            player.new_position = (800,600)
-            screen.blit(text,textRect)
+                thieves.remove(thief)
 
-        if current_time - spawn_time >= 5000:
-            if not npc_visible:
-                npc = NPC(npc_sprites)
-                npc_group.add(npc)
-                npc_visible = True
-                spawn_time = current_time
+        if len(thieves) == 0:
+            font = pygame.font.Font('freesansbold.ttf', 20)
+            text = font.render('Ok. So Dash got this round...', True, (0, 200, 0))
+            text_rect = text.get_rect()
+            text_rect.center = (400, 300)
+            screen.fill((255, 255, 255))
+            player.new_position = (800, 600)
+            screen.blit(text, text_rect)
 
-        if npc_visible and current_time - spawn_time >= 2000:
-            npc.kill()
-            npc_visible = False
+        ads.show(screen, current_time)  # Display advertisements
 
         npc_group.draw(screen)  # Draw NPCs after other elements
-
-        # Draw player on top of thieves
         screen.blit(player.image, camera.apply(player.rect))
 
         for npc in npc_group:
             npc.show_speech_bubble(screen)
 
         pygame.display.update()
-        pygame.display.flip()
+
+        # Limit the frame rate
+        clock.tick(target_fps)
+
     pygame.quit()
+
 
 if __name__ == '__main__':
     main()
