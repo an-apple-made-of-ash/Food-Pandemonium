@@ -25,10 +25,10 @@ class Player(pygame.sprite.Sprite):
         if keys[pygame.K_s] or keys[pygame.K_DOWN]:
             new_position.y += self.speed
             self.index = 0
-        if keys[pygame.K_a] or keys[pygame.K_RIGHT]:
+        if keys[pygame.K_a] or keys[pygame.K_LEFT]:
             new_position.x += self.speed
             self.index = 3
-        if keys[pygame.K_d] or keys[pygame.K_LEFT]:
+        if keys[pygame.K_d] or keys[pygame.K_RIGHT]:
             new_position.x -= self.speed
             self.index = 2
 
@@ -39,7 +39,7 @@ class Player(pygame.sprite.Sprite):
             self.rect.topleft = new_position.topleft
         else:
             pygame.quit()
-            subprocess.run(['python', 'Room 4\\teleport.py'])
+            subprocess.run(['python', 'teleport.py'])
         
 
 

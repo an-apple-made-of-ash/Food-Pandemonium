@@ -141,6 +141,60 @@ class Camera:
 
         self.camera = pygame.Rect(x, y, self.map_width, self.map_height)
 
+class NPC(pygame.sprite.Sprite):
+    def __init__(self,img_list):
+        super(NPC, self).__init__()
+        original_image = pygame.image.load(random.choice(img_list))
+        self.image = pygame.transform.scale(original_image, (120, 180))
+        self.rect = self.image.get_rect()
+        screen_width = 800
+        screen_height = 600
+
+        corner = random.choice(["top_left", "top_right", "bottom_left", "bottom_right"])
+
+        if corner == "top_left":
+            self.rect.topleft = (0, 0)
+        elif corner == "top_right":
+            self.rect.topright = (screen_width-130, 0)
+        elif corner == "bottom_left":
+            self.rect.bottomleft = (0, screen_height)
+        elif corner == "bottom_right":
+            self.rect.bottomright = (screen_width-130, screen_height)
+
+        # Load speech bubble image
+        self.speech_bubble = pygame.image.load("Assets/SpeechBubble.png")
+        self.speech_bubble = pygame.transform.scale(self.speech_bubble, (150, 100))
+        self.speech_bubble_rect = self.speech_bubble.get_rect()
+
+        # Text to be displayed in the speech bubble
+        self.text = "Hello, I'm an NPC!"
+
+        # Set the position of the speech bubble based on the corner
+        self.set_speech_bubble_position(corner)
+
+    def set_speech_bubble_position(self, corner):
+        screen_width = 800
+        screen_height = 600
+        if corner == "top_left":
+            self.speech_bubble_rect.midbottom = (160, 100)
+        elif corner == "top_right":
+            self.speech_bubble_rect.midbottom = (screen_width-88, 95)
+        elif corner == "bottom_left":
+            self.speech_bubble_rect.midtop = (160, screen_height-180)
+        elif corner == "bottom_right":
+            self.speech_bubble_rect.midtop = (screen_width-88, screen_height-180)
+
+    def show_speech_bubble(self, screen):
+        # Render speech bubble
+        screen.blit(self.speech_bubble, self.speech_bubble_rect)
+
+        # Render text
+        font = pygame.font.SysFont("comicsansms", 14)
+        text_surface = font.render(self.text, True, (0, 0, 0))
+        text_rect = text_surface.get_rect()
+        text_rect.center = self.speech_bubble_rect.center
+        screen.blit(text_surface, text_rect)
+
 def load_pygame(filename):
     tmx_data = pytmx.util_pygame.load_pygame(filename)
     return tmx_data
@@ -170,15 +224,23 @@ def main():
     path = os.path.join(os.path.dirname(__file__), 'Rm3Mappls.tmx')
     tmx_data = load_pygame(path)
     obstacles = get_collision_objects(tmx_data, "Tile Layer 1")
+    spawn_time = pygame.time.get_ticks()
+    npc_visible = False
 
     #Path to Assets
     asset_path = os.path.join(os.path.dirname(__file__), "..", "Assets")
-    imgs = [] 
+    imgs = ["Boy.png","Man.png","ManCap.png","Woman.png"] 
     paths = ["Delivery-Front.png","Delivery-Back.png","Delivery-Left.png","Delivery-Right.png"]
     sprites = []
+    npc_sprites = []
     for path in paths: 
         sprite_path = os.path.join(asset_path, path)
         sprites.append(sprite_path)
+
+    for path in imgs:
+        img_path = os.path.join(asset_path,path)
+        npc_sprites.append(img_path)
+    
     # Player setup
     player = Player(100, 100, sprites)  # Width and height set to 40 pixels
 
@@ -200,6 +262,7 @@ def main():
     thieves.append(thief6)
 
     camera = Camera(screen_width, screen_height, tmx_data.width * tmx_data.tilewidth, tmx_data.height * tmx_data.tileheight)
+    npc_group = pygame.sprite.Group()
 
     running = True
     clock = pygame.time.Clock()
@@ -211,6 +274,7 @@ def main():
                 running = False
 
         keys = pygame.key.get_pressed()
+        current_time = pygame.time.get_ticks()
 
         player.move(keys, obstacles)
 
@@ -235,10 +299,25 @@ def main():
             screen.fill((255,255,255))
             player.new_position = (800,600)
             screen.blit(text,textRect)
-                
+
+        if current_time - spawn_time >= 5000:
+            if not npc_visible:
+                npc = NPC(npc_sprites)
+                npc_group.add(npc)
+                npc_visible = True
+                spawn_time = current_time
+
+        if npc_visible and current_time - spawn_time >= 2000:
+            npc.kill()
+            npc_visible = False
+
+        npc_group.draw(screen)  # Draw NPCs after other elements
 
         # Draw player on top of thieves
         screen.blit(player.image, camera.apply(player.rect))
+
+        for npc in npc_group:
+            npc.show_speech_bubble(screen)
 
         pygame.display.update()
         pygame.display.flip()

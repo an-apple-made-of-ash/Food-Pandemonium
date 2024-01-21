@@ -1,10 +1,5 @@
-import os
 import pygame
-from pygame.locals import *
-from tiles import *
-from collide import *
 import subprocess
-import sys
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, x, y, image_paths):
@@ -16,7 +11,7 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(topleft=(x, y))
         self.speed = 5
 
-    def move(self, keys, obstacles):
+    def move(self, keys, treasure1, treasure2, treasure3, treasure4, treasure5, treasure6, portal):
         new_position = self.rect.copy()
 
         if keys[pygame.K_w] or keys[pygame.K_UP]:
