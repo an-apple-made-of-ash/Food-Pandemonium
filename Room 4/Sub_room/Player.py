@@ -1,5 +1,12 @@
 import pygame
 import subprocess
+from random import shuffle
+
+passwords = {1: 'hyefxt', 2: 'rwvnxz', 3: 'ctwldx', 4: 'lbimco', 5: 'mactuy', 6: 'fydaea'}
+order = [1, 2, 3, 4, 5, 6]
+shuffle(order)
+print(order)
+
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, x, y, image_paths):
@@ -11,7 +18,7 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(topleft=(x, y))
         self.speed = 5
 
-    def move(self, keys, treasure1, treasure2, treasure3, treasure4, treasure5, treasure6, portal):
+    def move(self, keys, border, treasure1, treasure2, treasure3, treasure4, treasure5, treasure6, portal):
         new_position = self.rect.copy()
 
         if keys[pygame.K_w] or keys[pygame.K_UP]:
@@ -30,8 +37,8 @@ class Player(pygame.sprite.Sprite):
         self.image = self.images[self.index]
 
         # Check for collisions 
-        if not any(new_position.colliderect(obstacle) for obstacle in obstacles):
+        if not any(new_position.colliderect(obstacle) for obstacle in border):
             self.rect.topleft = new_position.topleft
-        else:
-            pygame.quit()
-            subprocess.run(['python', 'Room 4\\teleport.py']) 
+        
+        if any(new_position.colliderect(obstacle) for obstacle in treasure1):
+            pass
