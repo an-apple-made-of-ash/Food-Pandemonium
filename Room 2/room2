@@ -189,6 +189,7 @@ while running:
     screen.fill((40, 40, 50))
     draw_map(screen, tmx_data, camera)
 
+##########################################################################################################################
     if (player.rect.x + player.rect.width) >= 1560 and (player.rect.y + player.rect.height) >= 560:
         font = pygame.font.Font('freesansbold.ttf', 24)
         text = font.render('Dash may have braved the weather but more awaits him...', True, (0, 200, 0))
