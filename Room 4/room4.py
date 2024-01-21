@@ -41,14 +41,10 @@ class Player(pygame.sprite.Sprite):
             self.rect.topleft = new_position.topleft
         else:
             pygame.quit()
-<<<<<<< Updated upstream:Room 4/room4.py
-            # Add teleportation logic here, if needed
-=======
             script_path = "teleport.py"
             subprocess.run(['python3', script_path])
             running = False 
         
->>>>>>> Stashed changes:Room 4/bordertest.py
 
         
 

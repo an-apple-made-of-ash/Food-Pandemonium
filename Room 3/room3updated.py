@@ -237,11 +237,6 @@ class NPC(pygame.sprite.Sprite):
         text_rect.center = self.speech_bubble_rect.center
         screen.blit(text_surface, text_rect)
 
-    def update(self):
-        current_time = pygame.time.get_ticks()
-        if current_time - self.appear_time > self.display_time:
-            self.kill()
-
 
 class Advertisement(pygame.sprite.Sprite):
     def __init__(self, ad_image_paths):
@@ -324,7 +319,7 @@ def main():
     screen = pygame.display.set_mode((screen_width, screen_height))
     
     # Load background image
-    background_image_path = os.path.join(os.path.dirname(__file__), "/Users/felicia/Documents/GitHub/hmmmmm/Assets/PaneBG.png")
+    background_image_path = os.path.join(os.path.dirname(__file__), '..',"Assets", "PaneBG.png")
     background_image = pygame.image.load(background_image_path)
     background_image = pygame.transform.scale(background_image, (screen_width, screen_height))
 
@@ -338,23 +333,11 @@ def main():
     asset_path = os.path.join(os.path.dirname(__file__), "..", "Assets")
     imgs = ["Boy.png", "Man.png", "ManCap.png", "Woman.png"]
     paths = ["Delivery-Front.png", "Delivery-Back.png", "Delivery-Left.png", "Delivery-Right.png"]
-    ads = ["Ad4.png","Ad2.png","Ad3.png"]
+    ad_paths = ["Ad4.png","Ad2.png","Ad3.png"]
     sprites = []
-    ad_paths = []
-    npc_sprites = []
     for path in paths:
         sprite_path = os.path.join(asset_path, path)
         sprites.append(sprite_path)
-
-    for path in imgs:
-        img_path = os.path.join(asset_path, path)
-        npc_sprites.append(img_path)
-
-    for path in ads:
-        img_path = os.path.join(asset_path, path)
-        ad_paths.append(img_path)
-
-    ads = Advertisement(ad_paths)
 
     # Player setup
     player = Player(100, 100, sprites)  # Width and height set to 40 pixels
@@ -374,7 +357,8 @@ def main():
                     tmx_data.height * tmx_data.tileheight)
     npc_group = pygame.sprite.Group()
 
-    ad_paths = ["Ad1.png", "Ad2.png", "Ad3.png"]
+    # Advertisement
+    ad_paths = [os.path.join(asset_path, ad_path) for ad_path in ad_paths]
     ads = Advertisement(ad_paths)
 
     advertisement_thread = threading.Thread(target=update_ads, args=(ads,))
@@ -388,6 +372,8 @@ def main():
     target_fps = 30
 
     while running:
+        # ... (rest of the main function remains the same)
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
