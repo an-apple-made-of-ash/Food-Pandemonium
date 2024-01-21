@@ -1,11 +1,9 @@
+
 #!/bin/bash
 
-python room1bordertest.py
-python room2withwind.py
-python room3updated.py
-python room4.py
+python3 "Room 1/room1bordertest.py"
+python3 "Room 2/room2withwind.py"
+python3 "Room 3/room3updated.py"
+python3 "Room 4/room4.py"
 
 
-#README
-#chmod +x run_rooms.sh
-#./run_rooms.sh
