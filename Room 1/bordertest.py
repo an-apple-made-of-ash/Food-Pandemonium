@@ -106,6 +106,16 @@ while running:
     # Draw sprites on top of the map
     all_sprites.draw(canvas)
 
+    if (player.rect.x + player.rect.width) >= 760 and (player.rect.y + player.rect.height) >= 60:
+        font = pygame.font.Font('freesansbold.ttf', 24)
+        text = font.render('Dash may have braved the weather but more awaits him...', True, (0, 200, 0))
+        textRect = text.get_rect()
+        textRect.center = (400, 300)
+        screen.fill((255, 255, 255))
+        player.rect.topleft = (800, 600)
+        screen.blit(text, textRect)
+        move = False
+
    
     screen.blit(canvas, (0, 0))
     pygame.display.flip()
