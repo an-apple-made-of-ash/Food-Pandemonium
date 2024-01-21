@@ -3,6 +3,7 @@
  <editorsettings>
   <export format="tmx"/>
  </editorsettings>
+ <tileset firstgid="0" source="Concrete tile.tsx"/>
  <tileset firstgid="1" source="feliciabrick.tsx"/>
  <tileset firstgid="2" source="feliciaDarkBrick.tsx"/>
  <tileset firstgid="3" source="feliciaTree.tsx"/>
