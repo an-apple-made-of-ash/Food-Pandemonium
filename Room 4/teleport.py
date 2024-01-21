@@ -78,7 +78,7 @@ while running:
             running = False 
 
     #all_sprites.update()
-    player.move(pygame.key.get_pressed(), obstacles)
+    player.move(pygame.key.get_pressed(), obstaclestele)
 
     canvas.fill((80, 80, 80))
     map.draw_map(canvas)
