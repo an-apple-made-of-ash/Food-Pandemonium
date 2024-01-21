@@ -131,11 +131,15 @@ westW = False
 northW = False 
 southW = False
 
+#Rain Assets 
+rain_path = (os.path.join(os.pardir(__file__), "..","Assets","Rain Filter.png"))
+print(rain_path)
+rain_filer = pygame.image.load(rain_path) 
+
+
 #Adding Events that will happen 
 SPAWNNPC = pygame.USEREVENT + 1
 pygame.time.set_timer(SPAWNNPC, 5000)
-
-NPCs = pygame.sprite.Group()
 
 while running:
     clock.tick(60)
@@ -147,7 +151,7 @@ while running:
         
         elif event.type == SPAWNNPC:
             new_NPC = NPC("Assets/Woman.png") 
-            NPCs.add(new_NPC)
+            all_sprites.add(new_NPC)
 
     if move:
         player.move(obstacles)
@@ -179,7 +183,6 @@ while running:
             last_weather_change = current_time 
             pygame.time.delay(delay_between_calls)      
 
-    NPCs.update() 
     all_sprites.update()
     camera.update(player)
 
