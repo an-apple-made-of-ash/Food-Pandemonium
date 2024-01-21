@@ -252,6 +252,12 @@ def main():
     pygame.init()
     screen_width, screen_height = 800, 600
     screen = pygame.display.set_mode((screen_width, screen_height))
+    
+    # Load background image
+    background_image_path = os.path.join(os.path.dirname(__file__), "PaneBG.png")
+    background_image = pygame.image.load(background_image_path)
+    background_image = pygame.transform.scale(background_image, (screen_width, screen_height))
+
     path = os.path.join(os.path.dirname(__file__), 'Rm3Mappls.tmx')
     tmx_data = load_pygame(path)
     obstacles = get_collision_objects(tmx_data, "Tile Layer 1")
@@ -298,11 +304,10 @@ def main():
                     tmx_data.height * tmx_data.tileheight)
     npc_group = pygame.sprite.Group()
 
-    #Advertisement
+    # Advertisement
     advertisement_thread = threading.Thread(target=update_ads, args=(ads,))
     advertisement_thread.daemon = True
     advertisement_thread.start()
-
 
     running = True
     clock = pygame.time.Clock()
@@ -321,7 +326,9 @@ def main():
         player.move(keys, obstacles)
         camera.update(player)
 
-        screen.fill((0, 0, 0))  # Clear screen
+        # Draw the background image
+        screen.blit(background_image, (0, 0))
+
         draw_map(screen, tmx_data, camera)
 
         # Move and draw thieves
@@ -355,7 +362,6 @@ def main():
         clock.tick(target_fps)
 
     pygame.quit()
-
 
 if __name__ == '__main__':
     main()
