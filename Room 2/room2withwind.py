@@ -14,8 +14,8 @@ import threading
 import itertools
 
 # Set your company's ChatGPT API key and URL here
-company_api_key = "981bdca6dae44b78a930541b4577f696"
-company_api_url = "https://dso-ie-openai.openai.azure.com/"
+company_api_key = 
+company_api_url = 
 
 # Ensure the company's ChatGPT API key is used directly
 openai.api_key = company_api_key
@@ -24,15 +24,15 @@ def insult(model):
     insults = []
     prompt = "Pretend you are an annoyed resident. Give me one very rude sentence expressing annoyance towards the delivery man for being slow. Give me a new novel response each time"
 
-    openai.api_type = "azure"
-    openai.api_version = "2023-05-15"
-    openai.api_base = "https://dso-ie-openai.openai.azure.com/"
-    openai.api_key = "981bdca6dae44b78a930541b4577f696"
+    openai.api_type = 
+    openai.api_version = 
+    openai.api_base = 
+    openai.api_key = 
 
     if model == 'gpt-4':
-        azure_oai_model = "dsogpt4" 
+        azure_oai_model = 
     else:
-        azure_oai_model = "dsochatgpt35"
+        azure_oai_model = 
 
     response = openai.ChatCompletion.create(
         engine=azure_oai_model,
