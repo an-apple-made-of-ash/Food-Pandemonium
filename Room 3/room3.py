@@ -374,8 +374,6 @@ def main():
                     tmx_data.height * tmx_data.tileheight)
     npc_group = pygame.sprite.Group()
 
-    ad_paths = ["Ad1.png", "Ad2.png", "Ad3.png"]
-    ads = Advertisement(ad_paths)
 
     advertisement_thread = threading.Thread(target=update_ads, args=(ads,))
     advertisement_thread.daemon = True
